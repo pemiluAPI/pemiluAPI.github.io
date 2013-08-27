@@ -40,6 +40,23 @@ body {
 	margin: 0;
 }
 
+/* put ideas into bubbles too */
+#ideas ul {
+	list-style-type: none;
+	margin: 0px 35px 0px 35px;
+	padding: 0;
+}
+#ideas li {
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+	border: none;
+	background-color: #ccc;
+	color: #1a2d33;
+	margin-bottom: 8px;
+	padding: 10px;
+}
+
 h1 {
 	color: #ff7f8c;
 	line-height: 45px;
