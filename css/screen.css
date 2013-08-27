@@ -1,0 +1,91 @@
+body {
+	margin: 0;
+	padding: 0;
+	background-color: #151926;
+	font-family: "MyriadPro-Regular", "Myriad Pro Regular", MyriadPro, "Myriad Pro", Helvetica, Arial, sans-serif;
+	font-size: 24px;
+	line-height: 30px;
+	font-weight: normal;
+	text-align: left;
+	color: #ccc;
+}
+
+#wrapper {
+	margin: 20px 20px 150px 20px;
+	width: 575px;
+}
+
+.blurb {
+	font-size: smaller;
+	color: #bbb;
+}
+
+.standout {
+	color: #fff;
+}
+
+/* div bubble to highlight text */
+.bubble {
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+	border: none;
+	background-color: #1A2D33;
+	padding: 10px;
+}
+.bubble p {
+	margin: 0px 0px 24px 0px;
+}
+.bubble p:last-child {
+	margin: 0;
+}
+
+h1 {
+	color: #ff7f8c;
+	line-height: 45px;
+}
+
+em, b {
+	color: #fff;
+}
+
+a {
+	color: #8378c7;
+}
+
+fieldset {
+	border: none;
+}
+
+input {
+	-webkit-border-radius: 3px;
+	-moz-border-radius: 3px;
+	border-radius: 3px;
+	border: none;
+	display: inline-block;
+	font-family: inherit;
+	font-size: inherit;
+	padding: 8px 9px 5px 8px;
+	vertical-align: middle;
+}
+
+input.textinput {
+	width: 75%;
+}
+
+input.button {
+	cursor: pointer;
+	background-color: #8378c7;
+}
+
+@media only screen and (max-width: 575px) {
+	#wrapper {
+		margin: 10px 10px 50px 10px;
+		width: 95%;
+	}
+
+	input.textinput {
+		width: 100%;
+	}
+}
+
