@@ -24,6 +24,24 @@ body {
 	color: #fff;
 }
 
+/* text logo */
+.logotext {
+	display: block;
+	font-size: 2em;
+	font-weight: bold;
+	margin-top: 0.67em;
+	margin-bottom: 0.67em;
+}
+.logoelections {
+	color: #4db2ff;
+}
+.logoapi {
+	color: #ffb84d;
+}
+.logo2014 {
+	color: #4db2ff;
+}
+
 /* div bubble to highlight text */
 .bubble {
 	-webkit-border-radius: 3px;
@@ -68,7 +86,7 @@ em, b {
 }
 
 a {
-	color: #8378c7;
+	color: #4db2ff;
 }
 
 fieldset {
@@ -94,7 +112,7 @@ input.textinput {
 input.button {
 	-webkit-appearance: none;
 	cursor: pointer;
-	background-color: #8378c7;
+	background-color: #4db2ff;
 }
 
 @media only screen and (max-width: 575px) {
