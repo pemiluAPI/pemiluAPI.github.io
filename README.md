@@ -1,5 +1,7 @@
 # pemilu API / elections API
 
+This is a repository for [a website about the Pemilu API](http://pemiluapi.org/).
+
 ## A civic information API for the 2014 Indonesian Elections
 
 This document is the beginnings of a plan for the elections API. No code has been written yet, which means that much of how the application will be built, served and maintained has not been decided.
