@@ -1,0 +1,51 @@
+<html>
+<head>
+	<title>Ide-ide Lain - Pemilu API 2014</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<link rel="stylesheet" type="text/css" media="screen" href="/css/screen.css"/>
+    <script type="text/javascript" src="/js/tabletop.js"></script>
+	<script type="text/javascript" src="http://mbostock.github.com/d3/d3.min.js"></script>
+
+</head>
+<body>
+<div id="wrapper">
+<div class="logotext"><span class="logoelections">PEMILU</span> <span class="logoapi">API</span> <span class="logo2014">2014</span></div>
+
+<div class="bubble">
+<p><span class="standout">Thank you for submitting an app idea!</span> Jika kamu tertarik untuk membangun aplikasi atau ikut terlibat dengan cara lain, kirim sur-el ke <a href="mailto:contact@pemiluapi.org">contact@pemiluapi.org</a> atau twit ke <a href="https://twitter.com/PemiluAPI/">@PemiluAPI</a>.</p>
+
+<p>Kamu bisa menemukan permulaan dari proposal teknis untuk API pada <a href="https://github.com/pemiluAPI/pemiluAPI.github.io/blob/master/README.md">README situs ini di GitHub</a>.</p>
+
+<p>Jika kamu ingin mengobrol lebih lanjut mengenai proyek ini, kamu bisa memulai atau bergabung dalam percakapan di <a href="https://github.com/pemiluAPI/pemiluAPI.github.io/issues">laman GitHub's Issues situs ini</a>.</p>
+</div>
+
+<p>Di bawah ini adalah beberapa ide aplikasi yang bisa dibuat pada <a href="/">PEMILU API 2014</a>, sebuah API untuk Pemilu 2014 di Indonesia.</p>
+
+<div id="ideas"></div>
+
+<!-- display the ideas -->
+<script type="text/javascript">
+	window.onload = function() { init() };
+
+	function init() {
+		Tabletop.init({key: '0ApMOA8U0y53_dEZBd3N4RkNra3Nvd1dIU2J4V1UtUFE', callback: showInfo, simpleSheet: true});
+	}
+
+	function showInfo(data) {
+		data.reverse();
+	    var ideasdiv = d3.select("#ideas")
+	    	.append("ul");
+
+	    // create a p for each object in the data
+	    var rows = ideasdiv.selectAll("li")
+	        .data(data)
+	        .enter()
+	        .append("li")
+	        .text(function(d) { return d.idea; });
+   
+	}
+</script>
+
+</div>
+</body>
+</html>
