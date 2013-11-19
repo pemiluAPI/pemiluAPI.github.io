@@ -15,6 +15,10 @@ body {
 	width: 575px;
 }
 
+.lang {
+	font-size: smaller;
+}
+
 .blurb {
 	font-size: smaller;
 	color: #bbb;
