@@ -1,0 +1,175 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+	<title>ID Dapil Provinsi Kursi</title>
+	<meta charset="utf-8" />
+
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.1/leaflet.css" />
+
+	<style>
+		#map {
+			width: 1100px;
+			height: 500px;
+		}
+
+		.info {
+			padding: 6px 8px;
+			font: 14px/16px Arial, Helvetica, sans-serif;
+			background: white;
+			background: rgba(255,255,255,0.8);
+			box-shadow: 0 0 15px rgba(0,0,0,0.2);
+			border-radius: 5px;
+		}
+		.info h4 {
+			margin: 0 0 5px;
+			color: #777;
+		}
+
+		.legend {
+			text-align: left;
+			line-height: 18px;
+			color: #555;
+		}
+		.legend i {
+			width: 18px;
+			height: 18px;
+			float: left;
+			margin-right: 8px;
+			opacity: 0.7;
+		}
+
+		.switch a {
+		  color: #ff33c4;
+		  background-color: #ffe1f6;
+		  text-decoration: none;
+		}
+	</style>
+</head>
+<body>
+	<div id="map"></div>
+
+	<div class="switch"><a href="index.html">go to dapil nasional</a></div>
+	<script src="http://cdn.leafletjs.com/leaflet-0.7.1/leaflet.js"></script>
+
+	<script type="text/javascript" src="dapil-provinsi.js"></script>
+	<script type="text/javascript">
+
+		var map = L.map('map').setView([-4, 117.5], 5);
+
+		var cloudmade = L.tileLayer('http://{s}.tile.cloudmade.com/{key}/{styleId}/256/{z}/{x}/{y}.png', {
+			attribution: 'Imagery &copy; 2011 CloudMade',
+			key: 'BC9A493B41014CAABB98F0471D759707',
+			styleId: 22677
+		}).addTo(map);
+
+
+		// control that shows dapil info on hover
+		var info = L.control();
+
+		info.onAdd = function (map) {
+			this._div = L.DomUtil.create('div', 'info');
+			this.update();
+			return this._div;
+		};
+
+		info.update = function (props) {
+			this._div.innerHTML = '<h4>ID Dapil Provinsi Kursi</h4>' +  (props ?
+				'<b>' + props.DPRD_PROV + '</b><br />' + props.KURSI_DPRD + ' kursi'
+				: 'Hover over a dapil');
+		};
+
+		info.addTo(map);
+
+		// get color depending on population kursi value
+		function getColor(d) {
+			return d > 10   ? '#FC4E2A' :
+			       d > 8   ? '#FD8D3C' :
+			       d > 6   ? '#FEB24C' :
+			       d > 4   ? '#FED976' :
+			                 '#FFEDA0';
+		}
+
+		// style of a feature (dapil) on the map
+		function style(feature) {
+			return {
+				weight: 2,
+				opacity: 1,
+				color: 'white',
+				dashArray: '3',
+				fillOpacity: 0.7,
+				fillColor: getColor(feature.properties.KURSI_DPRD)
+			};
+		}
+
+		function highlightFeature(e) {
+			var layer = e.target;
+
+			layer.setStyle({
+				weight: 2,
+				color: '#666',
+				dashArray: '',
+				fillOpacity: 0.7
+			});
+
+			if (!L.Browser.ie && !L.Browser.opera) {
+				layer.bringToFront();
+			}
+
+			info.update(layer.feature.properties);
+		}
+
+		var geojson;
+
+		function resetHighlight(e) {
+			geojson.resetStyle(e.target);
+			info.update();
+		}
+
+		function zoomToFeature(e) {
+			map.fitBounds(e.target.getBounds());
+		}
+
+		function onEachFeature(feature, layer) {
+			layer.on({
+				mouseover: highlightFeature,
+				mouseout: resetHighlight,
+				click: zoomToFeature
+			});
+		}
+
+		geojson = L.geoJson(dapilProvinsiData, {
+			style: style,
+			onEachFeature: onEachFeature
+		}).addTo(map);
+
+		map.attributionControl.addAttribution('Dapil data &copy; KPU');
+
+		// style and add the legend
+		var legend = L.control({position: 'bottomright'});
+
+		legend.onAdd = function (map) {
+
+			var div = L.DomUtil.create('div', 'info legend'),
+				grades = [3, 5, 7, 9, 11],
+				labels = [],
+				from, to;
+
+			for (var i = 0; i < grades.length; i++) {
+				from = grades[i];
+				to = from + 1;
+
+				labels.push(
+					'<i style="background:' + getColor(from) + '"></i> ' + from + '&ndash;' + to);
+			}
+
+			div.innerHTML = labels.join('<br>');
+			return div;
+		};
+
+		legend.addTo(map);
+
+	</script>
+</body>
+</html>
