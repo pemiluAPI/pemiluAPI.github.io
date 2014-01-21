@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>ID Dapil Nasional Kursi</title>
+	<title>ID Dapil Kab/Kota Kursi</title>
 	<meta charset="utf-8" />
 
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -50,11 +50,11 @@
 <body>
 	<div id="map"></div>
 
+	<div class="switch"><a href="../nasional/">go to dapil nasional</a></div>
 	<div class="switch"><a href="../provinsi/">go to dapil provinsi</a></div>
-	<div class="switch"><a href="../kabkota/">go to dapil kab/kota</a></div>
 	<script src="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js"></script>
 
-	<script type="text/javascript" src="dapil-nasional.js"></script>
+	<script type="text/javascript" src="dapil-kabkota.js"></script>
 	<script type="text/javascript">
 
 		var map = L.map('map').setView([-4, 117.5], 5);
@@ -76,8 +76,8 @@
 		};
 
 		info.update = function (props) {
-			this._div.innerHTML = '<h4>ID Dapil Nasional Kursi</h4>' +  (props ?
-				'<b>' + props.DPR_DAPIL + '</b><br />' + props.KURSIDAPIL + ' kursi'
+			this._div.innerHTML = '<h4>ID Dapil Kab/Kota Kursi</h4>' +  (props ?
+				'<b>' + props.DPRD_KAB + '</b><br />' + props.KURSIKAB + ' kursi'
 				: 'Hover over a dapil');
 		};
 
@@ -100,7 +100,7 @@
 				color: 'white',
 				dashArray: '3',
 				fillOpacity: 0.7,
-				fillColor: getColor(feature.properties.KURSIDAPIL)
+				fillColor: getColor(feature.properties.KURSIKAB)
 			};
 		}
 
@@ -140,7 +140,7 @@
 			});
 		}
 
-		geojson = L.geoJson(dapilNasionalData, {
+		geojson = L.geoJson(dapilKabKotaData, {
 			style: style,
 			onEachFeature: onEachFeature
 		}).addTo(map);
@@ -153,7 +153,7 @@
 		legend.onAdd = function (map) {
 
 			var div = L.DomUtil.create('div', 'info legend'),
-				grades = [3, 5, 7, 9],
+				grades = [3, 5, 7, 9, 11],
 				labels = [],
 				from, to;
 
