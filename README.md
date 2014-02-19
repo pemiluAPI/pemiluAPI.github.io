@@ -28,7 +28,7 @@ The API will be built with app developers in mind – it will scale to meet traf
 
 At the moment, we're looking for developers interested in working on the API and the apps that will run on it. If you're interested in being a part of this project, you can
 
-- contact us directly at [contact@pemiluapi.org](mailto:contact@pemiluapi.org) or [@PemiluAPI](https://twitter.com/PemiluAPI).
+- contact us directly at [contact@pemiluapi.org](mailto:contact@pemiluapi.org) or [@APIPemilu](https://twitter.com/APIPemilu).
 - start or join a discussion on the [issues page](https://github.com/pemiluAPI/pemiluAPI.github.io/issues)
 - suggest an app that could run on the API, a data source the API could provide or a piece of functionality the API should support.
 - watch this repo on github
