@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Peta Caleg</title>
+    <!-- third-party (vendor) scripts -->
+    <script src="js/vendor/aight.min.js"></script>
+    <script src="js/vendor/d3.v3.min.js"></script>
+    <script src="js/vendor/qs.min.js"></script>
+    <script src="js/vendor/queue.v1.min.js"></script>
+
+    <!-- Google Maps - TODO: add API key -->
+    <script src="http://maps.googleapis.com/maps/api/js?sensor=true&amp;v=3.14&amp;libraries=geometry,places"></script>
+    <script src="js/vendor/GeoJSON.min.js"></script>
+    <script src="js/vendor/topojson.v1.min.js"></script>
+
+    <!-- Peta Caleg (local) scripts -->
+    <script src="js/peta_caleg.js"></script>
+
+    <link rel="stylesheet" href="css/peta_caleg.css">
+  </head>
+  <body>
+    <div id="header">
+      <h1>Peta Caleg</h1>
+      <div id="map">
+      </div>
+    </div>
+    <script>
+
+    var pc = peta_caleg,
+        map,
+        win = d3.select(window)
+          .on("load", init),
+        proj = d3.geo.mercator(),
+        path = d3.geo.path()
+          .projection(proj),
+        padding = 1;
+
+    function init() {
+      map = new google.maps.Map(document.getElementById("map"), {
+        center: pc.geo.bounds.getCenter(),
+        zoom: 4,
+        mapTypeControl: false,
+        scrollwheel: false,
+        streetViewControl: false
+      });
+
+      var center = map.getCenter();
+      proj.center([center.lng(), center.lat()]);
+
+      map.mapTypes.set("basic", pc.geo.styles.basic);
+      map.setMapTypeId("basic");
+
+      queue()
+        .defer(d3.json, "data/admin-simple.topojson")
+        .await(function(error, adminTopology) {
+
+          // calculate Visvalingam areas
+          topojson.presimplify(adminTopology);
+
+          var admin = pc.geo.collection(adminTopology);
+          pc.geo.ADMIN = admin;
+          console.log("admin provinces:", admin.features);
+
+          console.time("points");
+          var points = [],
+              bbox = [];
+          admin.features.forEach(function(d, i) {
+            var centroid = d3.geo.centroid(d);
+            points.push([centroid[0], centroid[1], Infinity, i]);
+            var first = true,
+                stream = d3.geo.stream(d, {
+                  polygonStart: function() { },
+                  polygonEnd: function() { },
+                  lineStart: function() { },
+                  lineEnd: function() { },
+                  point: function(x, y, z) {
+                    if (!first) return;
+                    var p = proj([x, y]);
+                    if (!bbox[0]) {
+                      bbox[0] = [x, y];
+                      bbox[1] = [x, y];
+                    } else {
+                      if (p[0] < bbox[0][0]) bbox[0][0] = p[0];
+                      if (p[1] < bbox[0][1]) bbox[0][1] = p[1];
+                      if (p[0] > bbox[1][0]) bbox[1][0] = p[0];
+                      if (p[1] > bbox[1][1]) bbox[1][1] = p[1];
+                    }
+                    p[2] = z;
+                    p[3] = i;
+                    points.push(p);
+                  }
+                });
+          });
+          console.timeEnd("points");
+
+          console.log("bbox:", bbox);
+          var margin = 100;
+
+          console.time("voronoi");
+          var voronoi = d3.geom.voronoi()
+                .clipExtent([
+                  [bbox[0][0] - margin, bbox[0][1] - margin],
+                  [bbox[1][0] + margin, bbox[1][1] + margin]
+                ]),
+              regions = voronoi(points);
+          console.timeEnd("voronoi");
+
+          var voronoiFeatures = d3.nest()
+            .key(function(d) {
+              return d ? d.point[3] : "";
+            })
+            .entries(regions)
+            .filter(function(d) {
+              return d.key;
+            })
+            .map(function(d) {
+              var i = +d.key,
+                  feature = admin.features[i],
+                  polygons = d.values.map(function(d) {
+                    return [d.map(proj.invert)];
+                  });
+              return {
+                type: "Feature",
+                id: feature.id,
+                properties: feature.properties,
+                geometry: {
+                  type: "MultiPolygon",
+                  coordinates: polygons
+                }
+              };
+            });
+
+          console.log("voronoi features:", voronoiFeatures);
+
+          var voronoiCollection = {
+            type: "FeatureCollection",
+            features: voronoiFeatures
+          };
+
+          var styles = {
+            off: {
+              fillColor: "#f0f",
+              fillOpacity: .4,
+              strokeColor: "#fff",
+              strokeWeight: .5,
+              strokeOpacity: 1
+            },
+            over: {
+              strokeColor: "#000",
+              strokeWeight: 1,
+              strokeOpacity: 1
+            },
+            selected: {
+              fillColor: "#f0f",
+              fillOpacity: 1,
+              strokeColor: "#fff",
+              strokeWeight: .5,
+              strokeOpacity: 1
+            },
+            selectedOver: {
+              fillColor: "#f0f",
+              fillOpacity: 1,
+              strokeColor: "#000",
+              strokeWeight: .5,
+              strokeOpacity: 1
+            }
+          };
+
+          var hoverRegions = new GeoJSON(voronoiCollection, {
+            fillColor: "#fff",
+            fillOpacity: .1,
+            strokeColor: "#000",
+            strokeOpacity: .1,
+            strokeWeight: .5
+          });
+
+          var adminLayers = new GeoJSON(admin, styles.off),
+              layers = [],
+              layersById = {};
+
+          setTimeout(function() {
+            layers = addLayerToMap(adminLayers, map);
+            layers.forEach(function(layer) {
+              google.maps.event.addListener(layer, "mouseover", mouseover);
+              google.maps.event.addListener(layer, "click", click);
+              google.maps.event.addListener(layer, "mouseout", mouseout);
+
+              var provinceId = layer.geojsonProperties.id_provinsi;
+              if (provinceId in layersById) {
+                layersById[provinceId].push(layer);
+              } else{
+                layersById[provinceId] = [layer];
+              }
+            });
+          }, 1000);
+
+          addLayerToMap(hoverRegions, map)
+            .forEach(function(layer) {
+              google.maps.event.addListener(layer, "mouseover", mouseover);
+              google.maps.event.addListener(layer, "click", click);
+              google.maps.event.addListener(layer, "mouseout", mouseout);
+            });
+
+          // console.log("# layers:", layers.length);
+          // console.log("layers by province ID:", layersById);
+
+          var selectedProperties;
+          function click(layer) {
+            if (selectedProperties) selectedProperties.selected = false;
+            selectedProperties = this.geojsonProperties;
+            selectedProperties.selected = true;
+            layers.forEach(function(layer) {
+              if (layer.geojsonProperties.selected) {
+                layer.setOptions(styles.selectedOver);
+              } else {
+                layer.setOptions(styles.off);
+              }
+            });
+          }
+
+          function mouseover(layer) {
+            var provinceId = this.geojsonProperties.id_provinsi;
+            // console.log("over:", provinceId);
+            layersById[provinceId].forEach(function(child) {
+              child.setOptions(child.geojsonProperties.selected
+                ? styles.selectedOver
+                : styles.over);
+            });
+          }
+
+          function mouseout(layer) {
+            var provinceId = this.geojsonProperties.id_provinsi;
+            // console.log("out:", provinceId);
+            layersById[provinceId].forEach(function(child) {
+              child.setOptions(child.geojsonProperties.selected
+                ? styles.selected
+                : styles.off);
+            });
+          }
+
+        });
+    }
+
+    function addLayerToMap(layer, map) {
+      var added = [];
+      if (Array.isArray(layer)) {
+        layer.forEach(function(child) {
+          added = added.concat(addLayerToMap(child, map));
+        });
+      } else {
+        try {
+          layer.setMap(map);
+          added.push(layer);
+        } catch (err) {
+          console.warn("unable to add layer:", layer);
+        }
+      }
+      return added;
+    }
+
+    </script>
+  </body>
+</html>

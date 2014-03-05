@@ -1,0 +1,134 @@
+body {
+  font-family: "Helvetica Neue", Helvetica, arial, sans-serif;
+  font-size: 14px;
+  padding: 0;
+  margin: 0;
+  position: relative;
+}
+
+#header h1 {
+  font-size: 24px;
+  margin: 0;
+  padding: 2px 8px;
+}
+
+#map {
+  height: 250px;
+}
+
+#bodies,
+#bodies ul,
+#bodies li {
+  position: relative;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+  #bodies ul {
+    padding-left: 1em;
+  }
+
+.provinces,
+.districts,
+.candidates,
+.candidate .detail,
+a.close {
+  display: none;
+}
+
+.body.selected .provinces,
+.province.selected .candidates,
+.province.selected .districts,
+.candidate.selected .detail,
+.selected > .title > a.close {
+  display: block;
+}
+
+.title {
+  padding: 0;
+  margin: 0;
+  position: relative;
+}
+
+  .title > a.text {
+    padding: 8px;
+    display: block;
+    background: #eee;
+  }
+
+  .selected > .title > a.text {
+    background: #ddd;
+  }
+
+  .candidate > .title a.text {
+    padding-left: 0;
+  }
+
+  .candidate .title img.photo {
+    display: inline-block;
+    height: 30px;
+    margin-right: 8px;
+  }
+
+a.close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  font-weight: bold;
+  font-size: 32px;
+  text-decoration: none;
+  height: 100%;
+  line-height: 95%;
+  padding: 0 12px;
+  color: red;
+  background: #fff;
+}
+
+.loading {
+  display: block !important;
+  height: 1px;
+  background: #666;
+}
+
+  .loading > * {
+    display: none;
+  }
+
+.content {
+  height: 100px;
+  padding-left: 120px;
+  position: relative;
+}
+
+.content .map {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100px;
+  height: 100%;
+  background: #fff;
+}
+
+.map > svg.map {
+  width: 100%;
+  height: 100%;
+  background: #b3d1ff;
+}
+
+svg.map path {
+  vector-effect: non-scaling-stroke;
+}
+
+svg.map .bg {
+  fill: #e5e3df;
+  stroke: #ccc;
+  stroke-width: .5;
+}
+
+svg.map .fg path {
+  fill: #f0f;
+  fill-opacity: .5;
+  stroke: #ccc;
+  stroke-width: .5;
+}

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Peta Caleg | examples | District Maps</title>
+    <script src="js/vendor/aight.min.js"></script>
+    <script src="js/vendor/d3.v3.min.js"></script>
+    <script src="http://maps.googleapis.com/maps/api/js?sensor=true&amp;v=3.14&amp;libraries=geometry,places"></script>
+    <style>
+
+      div.map {
+        height: 400px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <h1>District Maps</h1>
+
+    <div class="example" id="just-map">
+      <h2>Just the Map</h2>
+    </div>
+
+    <script>
+
+      var INDONESIA = {
+        bounds: new google.maps.LatLngBounds(
+          new google.maps.LatLng(-11.56, 94.49),
+          new google.maps.LatLng(7.75, 141.95)
+        )
+      };
+
+      d3.select(window)
+        .on("load", initialize);
+
+      function initialize() {
+
+        d3.select("#just-map")
+          .append("div")
+            .attr("class", "map")
+            .each(function() {
+
+              var map = new google.maps.Map(this, {
+                mapTypeId: google.maps.MapTypeId.ROADMAP,
+                center: INDONESIA.bounds.getCenter(),
+                zoom: 5
+              });
+
+              map.fitBounds(INDONESIA.bounds);
+
+            });
+      }
+
+    </script>
+  </body>
+</html>
