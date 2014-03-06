@@ -724,9 +724,9 @@
 
         if (error) return callback(error);
 
-        var items = selection.selectAll("li.candidate")
-              .data(function(d) {
-                return d.caleg;
+        var items = list.selectAll("li.candidate")
+              .data(candidates, function(d) {
+                return d.id;
               }),
             enter = items.enter()
               .append("li")
