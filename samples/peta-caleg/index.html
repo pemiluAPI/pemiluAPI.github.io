@@ -673,15 +673,13 @@
         var title = enter.append("h4")
               .attr("class", "title"),
             link = title.append("a")
+              .attr("class", "text")
               .attr("href", function(d) {
                 return "#" + getPartyId(d);
+              })
+              .text(function(d) {
+                return d.nama;
               });
-
-        link.append("span")
-          .attr("class", "name")
-          .text(function(d) {
-            return d.nama;
-          });
 
         groups
           .attr("id", getPartyId)
