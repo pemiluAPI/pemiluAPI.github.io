@@ -1,0 +1,94 @@
+body {
+  padding-top: 70px;
+}
+
+#peta {
+  height: 250px;
+}
+
+#nav-provinsi a {
+  font-size: 2em;
+  font-weight: bold;
+}
+
+#lembaga .lembaga {
+  display: none;
+}
+
+#lembaga .lembaga.active {
+  display: block;
+}
+
+a.pull-left {
+  /* so that the element doesn't disappear when there's no content */
+  min-height: 1px;
+}
+
+svg.media-object {
+  width: 80px;
+  height: 80px;
+  background: #eee;
+}
+
+img.media-object {
+  width: 80px;
+  height: auto;
+}
+
+.media,
+.media .media {
+  margin-top: 4px;
+}
+
+.media-body {
+  display: none;
+}
+
+.media.active > .media-body {
+  display: block;
+}
+
+.media-body h3 {
+  color: #999;
+  margin-top: 0;
+}
+
+.media-heading {
+  overflow: hidden;
+  zoom: 1;
+}
+
+.media.active > .media-heading {
+  border-bottom: 2px solid;
+}
+
+.media.active > .media-heading a {
+  color: #000;
+  text-decoration: none !important;
+}
+
+.media.provinsi > .media-heading,
+.media.dapil > .media-heading {
+  /* to align the province name with its map */
+  margin-top: 22px;
+}
+
+table.caleg {
+  width: auto !important;
+  border-collapse: collapse;
+}
+
+table.caleg td,
+table.caleg th {
+  border: none !important;
+  padding: 0 8px 0 0 !important;
+}
+
+table.caleg td:first-child {
+  font-weight: bold;
+}
+
+table.caleg th:last-child {
+  color: #666;
+  font-weight: normal;
+}
