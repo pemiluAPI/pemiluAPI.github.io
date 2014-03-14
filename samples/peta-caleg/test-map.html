@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <!-- third-party (vendor) scripts -->
+    <script src="js/vendor/d3.v3.min.js"></script>
+    <script src="js/vendor/qs.min.js"></script>
+
+    <script src="http://maps.googleapis.com/maps/api/js?sensor=true&amp;v=3.14&amp;libraries=geometry,places"></script>
+    <script src="js/vendor/GeoJSON.min.js"></script>
+    <script src="js/vendor/topojson.v1.min.js"></script>
+
+    <script src="js/PetaCaleg.js"></script>
+    <style>
+
+      #map {
+        height: 400px;
+        background: #ccc;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="map">
+    </div>
+    <script>
+
+      var map;
+      window.addEventListener("load", function() {
+        map = new PetaCaleg.Map({
+          root: "#map"
+        });
+      });
+
+    </script>
+  </body>
+</html>
+

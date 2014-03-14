@@ -1,0 +1,87 @@
+#peta {
+  height: 280px;
+}
+
+svg.media-object {
+  width: 100px;
+  height: 100px;
+  background: #ccc;
+}
+
+.caleg .media-object {
+  width: 100px;
+}
+
+.caleg.media .media-body {
+  display: none;
+}
+
+.caleg.media.active .media-body {
+  display: block;
+}
+
+.breadcrumb li.active a {
+  color: inherit !important;
+}
+
+.zoom-control {
+  margin: 10px;
+}
+
+  .zoom-control button {
+    display: block;
+    background: #000;
+    width: 2em;
+    height: 2em;
+    margin-bottom: 5px;
+    position: relative;
+  }
+
+  .zoom-control button:after {
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    height: 1em;
+    width: 1em;
+    text-align: center;
+    margin: -.72em 0 0 -.5em;
+    color: #fff;
+    font-size: 200%;
+    font-weight: normal;
+  }
+
+  .zoom-control button.in:after {
+    content: "+";
+    margin-top: -.74em;
+  }
+
+  .zoom-control button.out:after {
+    content: "\2212";
+  }
+
+/* don't scale strokes */
+svg path {
+  vector-effect: non-scaling-stroke !important;
+}
+
+svg.map {
+  background: #b3d1ff;
+}
+
+svg.map .bg {
+  fill: #e5e3df;
+  stroke: #ccc;
+  stroke-width: .5;
+}
+
+svg.map .fg path {
+  fill: #f0f;
+  fill-opacity: .5;
+  stroke: #ccc;
+  stroke-width: .5;
+}
+
+svg.shared {
+  display: none;
+}

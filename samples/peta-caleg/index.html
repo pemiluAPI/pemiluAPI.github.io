@@ -1,838 +1,155 @@
 <!DOCTYPE html>
-<html>
+<html lang="in">
   <head>
     <title>Peta Caleg</title>
-    <!-- third-party (vendor) scripts -->
-    <script src="js/vendor/aight.min.js"></script>
-    <script src="js/vendor/d3.v3.min.js"></script>
-    <script src="js/vendor/qs.min.js"></script>
-    <script src="js/vendor/queue.v1.min.js"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <!-- Google Maps - TODO: add API key -->
+    <!-- third-party (vendor) scripts -->
+    <script src="js/vendor/d3.v3.min.js"></script>
+    <script src="js/vendor/queue.v1.min.js"></script>
+    <script src="js/vendor/qs.min.js"></script>
+
     <script src="http://maps.googleapis.com/maps/api/js?sensor=true&amp;v=3.14&amp;libraries=geometry,places"></script>
     <script src="js/vendor/GeoJSON.min.js"></script>
     <script src="js/vendor/topojson.v1.min.js"></script>
 
-    <!-- Peta Caleg (local) scripts -->
-    <script src="js/peta_caleg.js"></script>
-    <script src="js/peta_caleg.api.js"></script>
-    <script src="js/peta_caleg.router.js"></script>
+    <script src="js/PetaCaleg.js"></script>
 
-    <link rel="stylesheet" href="css/peta_caleg.css">
+    <link rel="stylesheet" href="css/vendor/bootstrap/bootstrap.min.css">
+    <link rel="stylesheet" href="css/PetaCaleg.css">
   </head>
   <body>
-    <div id="header">
-      <h1>Peta Caleg</h1>
-      <div id="map">
+    <div class="container">
+
+      <div id="header">
+        <div id="navbar" class="navbar navbar-inverse">
+          <div class="container">
+            <div class="navbar-header">
+              <a class="navbar-brand" href="#">Peta Caleg</a>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
 
-    <div id="page">
-
-      <ul id="bodies">
-        <li id="DPD" class="body">
-          <h2 class="title">
-            <a class="text" href="#DPD">DPD</a>
-            <a class="close" href="#">&times;</a>
-          </h2>
-        </li>
-        <li id="DPR" class="body">
-          <h2 class="title">
-            <a class="text" href="#DPR">DPR</a>
-            <a class="close" href="#">&times;</a>
-          </h2>
-        </li>
-        <li id="DPRDI" class="body">
-          <h2 class="title">
-            <a class="text" href="#DPRDI">DPRDI</a>
-            <a class="close" href="#">&times;</a>
-          </h2>
-        </li>
+      <ul id="nav-lembaga" class="nav nav-pills nav-justified">
+        <li><a href="#DPD">DPD</a></li>
+        <li><a href="#DPR">DPR</a></li>
+        <li><a href="#DPRDI">DPRDI</a></li>
       </ul>
-    </div>
 
+      <div id="peta">
+      </div>
+
+      <ol id="breadcrumb" class="breadcrumb">
+      </ol>
+
+      <div id="content">
+      </div>
+
+      <svg class="shared">
+        <defs>
+          <g id="map-bg"></g>
+        </defs>
+      </svg>
+    </div>
     <script>
 
-    var pc = peta_caleg,
-        win = d3.select(window)
-          .on("hashchange", hashchange)
-          .on("load", init),
-        map,
-        bodies = d3.select("#bodies"),
-        api = pc.api()
-          .key("7941b0baecd128c4de3a9ae63a85fd2c"),
-        route = pc.router()
-          .match("", function(req) {
-            setContext({
-              body: null
-            });
-          })
-          .match("DPD", function(req) {
-            setContext({
-              body: "DPD"
-            });
-          })
-          .match("DPD/provinsi/{provinsi}", function(req) {
-            setContext({
-              body: "DPD",
-              province: req.data.provinsi
-            });
-          })
-          .match("DPD/provinsi/{provinsi}/caleg/{caleg}", function(req) {
-            setContext({
-              body: "DPD",
-              province: req.data.provinsi,
-              candidate: req.data.caleg
-            });
-          })
-          .match("DPR", function(req) {
-            setContext({
-              body: "DPR",
-            });
-          })
-          .match("DPR/provinsi/{provinsi}", function(req) {
-            setContext({
-              body: "DPR",
-              province: req.data.provinsi
-            });
-          })
-          .match("DPR/provinsi/{provinsi}/dapil/{dapil}", function(req) {
-            setContext({
-              body: "DPR",
-              province: req.data.provinsi,
-              district: req.data.dapil
-            });
-          })
-          .match("DPR/provinsi/{provinsi}/dapil/{dapil}/partai/{partai}", function(req) {
-            setContext({
-              body: "DPR",
-              province: req.data.provinsi,
-              district: req.data.dapil,
-              party: req.data.partai
-            });
-          })
-          .match("DPR/provinsi/{provinsi}/dapil/{dapil}/partai/{partai}/caleg/{caleg}", function(req) {
-            setContext({
-              body: "DPR",
-              province: req.data.provinsi,
-              district: req.data.dapil,
-              party: req.data.partai,
-              candidate: req.data.caleg
-            });
-          })
-          .match("DPRDI", function(req) {
-            setContext({
-              body: "DPRDI",
-            });
-          })
-          .match("DPRDI/provinsi/{provinsi}", function(req) {
-            setContext({
-              body: "DPRDI",
-              province: req.data.provinsi
-            });
-          })
-          .match("DPRDI/provinsi/{provinsi}/dapil/{dapil}", function(req) {
-            setContext({
-              body: "DPRDI",
-              province: req.data.provinsi,
-              district: req.data.dapil
-            });
-          })
-          .match("DPRDI/provinsi/{provinsi}/dapil/{dapil}/partai/{partai}", function(req) {
-            setContext({
-              body: "DPRDI",
-              province: req.data.provinsi,
-              district: req.data.dapil,
-              party:    req.data.partai
-            });
-          })
-          .match("DPRDI/provinsi/{provinsi}/dapil/{dapil}/partai/{partai}/caleg/{caleg}", function(req) {
-            setContext({
-              body: "DPRDI",
-              province:   req.data.provinsi,
-              district:   req.data.dapil,
-              party:      req.data.partai,
-              candidate:  req.data.caleg
-            });
-          })
-          .notfound(function(req) {
-            alert("404:", req.url);
+      var app,
+          resolver = new PetaCaleg.Resolver(),
+          api = new PetaCaleg.API({
+            key: "7941b0baecd128c4de3a9ae63a85fd2c" // XXX
+          }),
+          nav = d3.select("#nav-lembaga")
+            .selectAll("li")
+            .datum(function() {
+              return d3.select(this).select("a")
+                .attr("href")
+                .substr(1);
+            }),
+          mapBg = "#map-bg",
+          mapIcon = new PetaCaleg.MapIcon({
+            background: mapBg
           });
 
-    var proj = d3.geo.mercator(),
-        path = d3.geo.path()
-          .projection(proj),
-        padding = 1;
-
-    function init() {
-      map = new google.maps.Map(document.getElementById("map"), {
-        center: pc.geo.bounds.getCenter(),
-        zoom: 4,
-        mapTypeControl: false,
-        scrollwheel: false,
-        streetViewControl: false
-      });
-
-      var center = map.getCenter();
-      proj.center([center.lng(), center.lat()]);
-
-      map.mapTypes.set("basic", pc.geo.styles.basic);
-      map.setMapTypeId("basic");
-
-      queue()
-        .defer(d3.json, "data/admin.topojson")
-        .defer(d3.json, "data/dapil.topojson")
-        .defer(d3.json, "data/nearby_countries.topojson")
-        .await(function(error, adminTopology, dapilTopology, nearbyTopology) {
-
-          console.time("geo");
-
-          pc.geo.NEARBY = pc.geo.collapseTopology(nearbyTopology);
-
-          console.log("admin bbox:", adminTopology.bbox);
-
-          var admin = pc.geo.collection(adminTopology);
-          pc.geo.ADMIN = admin;
-          console.log("admin provinces:", admin.features);
-
-          var adminLayers = new GeoJSON(admin, {
-            fillColor: "#f0f",
-            fillOpacity: .4,
-            strokeColor: "#fff",
-            strokeWeight: .5,
-            strokeOpacity: 1
-          });
-
-          addLayerToMap(adminLayers, map)
-            .forEach(function(layer) {
-              // TODO add click handlers
-            });
-
-          pc.geo.DPR = pc.geo.collection(dapilTopology, "DAPIL_NASIONAL_DPR");
-          pc.geo.DPRDI = pc.geo.collection(dapilTopology, "DAPIL_PROVINSI_DPRDI");
-
-          var shared = d3.select("body")
-                .append("svg")
-                  .attr("id", "shared")
-                  .attr("class", "map")
-                  .append("defs"),
-              bg = shared.append("g")
-                .attr("id", "map-bg");
-
-          bg.append("path")
-            .attr("class", "countries bg")
-            .attr("d", path(pc.geo.NEARBY));
-
-          bg.append("path")
-            .attr("class", "admin bg")
-            .attr("d", path(pc.geo.ADMIN));
-
-          console.timeEnd("geo");
-
-          ready();
+      window.addEventListener("load", function init() {
+        app = new PetaCaleg.App({
+          api: api,
+          // the map instance
+          map: new PetaCaleg.Map({
+            root: "#peta"
+          }),
+          mapIcon: mapIcon,
+          // where the breadcrumb nav lives
+          breadcrumb: "#breadcrumb",
+          // where to render content (listings + detail views)
+          content:    "#content",
+          // valid URLs
+          routes: [
+            "{lembaga}",
+            "{lembaga}/provinsi/{provinsi}",
+            "{lembaga}/provinsi/{provinsi}/caleg/{caleg}",
+            "{lembaga}",
+            "{lembaga}/dapil/{dapil}",
+            "{lembaga}/dapil/{dapil}/partai/{partai}",
+            "{lembaga}/dapil/{dapil}/partai/{partai}/caleg/{caleg}",
+          ]
         });
 
-      function ready() {
-        if (location.hash) {
-          hashchange();
-        } else {
-          location.hash = "#DPD";
-        }
-      }
-    }
-
-    function hashchange() {
-      var hash = location.hash.substr(1);
-      route(hash);
-    }
-
-    function setContext(context, callback) {
-      function done(error) {
-        if (error) console.warn("error:", error);
-        if (callback) callback.apply(null, arguments);
-      }
-
-      // abort the last active API request, if there is one
-      api.abort();
-
-      // if there's no legislative body (lembaga) selected,
-      // deselect them all and bail
-      if (!context.body) {
-        bodies
-          .attr("class", "none")
-          .style("display", null)
-          .selectAll(".body")
-            .classed("selected", false);
-
-        return done(null, "no body selected");
-      }
-
-      // get a reference to the view object
-      var root = d3.select("#" + context.body);
-
-      if (root.empty()) {
-        console.error("no such view:", id);
-        return done("no such view: " + id);
-      }
-
-      // toggle the selected state of all body-specific elements
-      bodies
-        .attr("class", context.body)
-        .style("display", null)
-        .selectAll(".body")
-          .classed("selected", function() {
-            return this.id === context.body;
+        // whenever the app switches contexts...
+        app.on("context", function(context) {
+          // update the nav
+          nav.classed("active", function(d) {
+            return d === context.lembaga;
           });
-
-      root.call(listProvinces, context, function(error, provinces) {
-        if (error) return done(error);
-        else if (!context.province) return done();
-
-        provinces.call(selectProvince, context, function(error, province) {
-          console.log("selected province:", province.datum());
-          if (error) return done(error);
-
-          // if we're in the DPD, provinces have candidates
-          if (context.body === "DPD") {
-
-            return province.call(listCandidates, context, function(error, candidates) {
-              if (error) return done(error);
-              if (!context.candidate) return done(null, candidates);
-              return candidates.call(selectCandidate, context, function(error, candidate) {
-                return done(error);
-              });
-            });
-
-          } else {
-
-            return province.call(listDistricts, context, function(error, districts) {
-              if (error) return done(error);
-              if (!context.district) return done(null, districts);
-              return districts.call(selectDistrict, context, function(error, district) {
-                if (error) return done(error);
-                return district.call(listParties, context, function(error, parties) {
-                  if (error) return done(error);
-                  if (!context.party) return done(null, parties);
-                  return parties.call(selectParty, context, function(error, party) {
-                    if (error) return done(error);
-                    return party.call(listCandidates, context, function(error, candidates) {
-                      if (error) return done(error);
-                      if (!context.candidate) return done(null, candidates);
-                      return candidates.call(selectCandidate, context, function(error, candidate) {
-                        return done(error);
-                      });
-                    });
-                  });
-                });
-              });
-            });
-
-          }
-        });
-      });
-    }
-
-    function setView(id, callback) {
-      if (callback) callback(null, root);
-    }
-
-    function listProvinces(selection, context, callback) {
-      var list = selection.select(".provinces");
-      if (list.empty()) {
-        list = selection.append("ul")
-          .attr("class", "provinces");
-      }
-      list
-        .classed("loading", true)
-        .classed("error", false);
-      return api.get("provinsi", function(error, res) {
-        list.classed("loading", false)
-          .classed("error", !!error);
-
-        if (error) return callback(error);
-
-        var provinces = res.results.provinsi;
-
-        if (error || !provinces.length) {
-          return callback ? callback(error) : null;
-        }
-
-        var adminCollection = pc.geo.ADMIN;
-        // filter out provinces without a corresponding admin feature
-        provinces = provinces.filter(function(d) {
-          return d.id in adminCollection.lookup;
         });
 
-        console.log("provinces:", provinces);
-        var items = list.selectAll("li.province")
-              .data(provinces, function(d) {
-                return d.id;
-              }),
-            enter = items.enter()
-              .append("li")
-                .attr("class", "province");
+        // kick it all off
+        app.init();
 
-        items.exit().remove();
-
-        items
-          .attr("id", getProvinceId)
-          .classed("selected", false)
-          .each(function(d) {
-            d.feature = adminCollection.lookup[d.id];
-          });
-
-        var title = enter.append("h3")
-          .attr("class", "title");
-
-        title.append("a")
-          .attr("class", "text")
-          .attr("href", function(d) {
-            return "#" + getProvinceId(d);
+        var get = api.get.bind(api);
+        queue()
+          .defer(get, "geographic/api/getmap", {
+            filename: "nearby_countries.topojson"
           })
-          .text(function(d) {
-            return d.nama || "(no name)";
-          });
-
-        title.append("a")
-          .html("&times;")
-          .attr("class", "close")
-          .attr("href", function(d) {
-            return "#" + context.body;
-          });
-
-        var content = enter.append("div")
-          .attr("class", "content");
-
-        var thumb = content.append("div")
-          .attr("class", "map thumb");
-
-        var svg = thumb.append("svg")
-          .attr("class", "map")
-          .attr("viewBox", function(d) {
-            var bounds = path.bounds(d.feature);
-            return [
-              bounds[0][0] - padding,
-              bounds[0][1] - padding,
-              bounds[1][0] - bounds[0][0] + padding * 2,
-              bounds[1][1] - bounds[0][1] + padding * 2
-            ].join(" ");
-          });
-
-        svg.append("use")
-          .attr("xlink:href", "#map-bg");
-
-        svg.append("g")
-          .attr("class", "fg")
-          .append("path")
-            .attr("class", "province")
-            .attr("d", function(d) {
-              return path(d.feature);
-            });
-
-        if (callback) callback(null, items);
-      });
-
-      function getProvinceId(d) {
-        return [context.body, "provinsi", d.id].join("/");
-      }
-    }
-
-    function selectProvince(list, context, callback) {
-      var id = context.province,
-          children = list
-            .classed("selected", function(d) {
-              return d.id == id;
-            }),
-          selected = children.filter(".selected"); // XXX
-      if (callback) {
-        return selected.empty()
-          ? callback("no such province: " + id)
-          : callback(null, selected);
-      }
-    }
-
-    function listDistricts(selection, context, callback) {
-      var list = selection.select(".districts");
-      if (list.empty()) {
-        list = selection.append("ul")
-          .attr("class", "districts");
-      }
-
-      var params = {
-        lembaga: context.body,
-        provinsi: context.province
-      };
-
-      list
-        .classed("loading", true)
-        .classed("error", false);
-      return api.get("dapil", params, function(error, res) {
-        list
-          .classed("loading", false)
-          .classed("error", !!error);
-        if (error) return callback(error);
-
-        var districts = res.results.dapil;
-        console.log("got districts:", districts);
-
-        var boundaries = pc.geo[context.body];
-        if (!boundaries) {
-          throw "No boundaries for " + context.body;
-        }
-
-        var items = list.selectAll("li.district")
-              .data(districts, function(d) {
-                return d.id;
-              }),
-            enter = items.enter()
-              .append("li")
-                .attr("class", "district");
-
-        var title = enter.append("h4")
-          .attr("class", "title");
-
-        title.append("a")
-          .attr("class", "text")
-          .attr("href", function(d) {
-            return "#" + getDistrictId(d);
+          .defer(get, "geographic/api/getmap", {
+            filename: "admin-simple.topojson"
           })
-          .text(function(d) {
-            return d.nama || "(no name)";
+          .await(function(error, nearby, admin) {
+            if (error) {
+              console.warn("unablet to load map background:", error);
+              return;
+            }
+
+            var bg = d3.select(mapBg);
+            bg.append("path")
+              .attr("class", "nearby")
+              .datum(makeCollection(nearby))
+              .attr("d", mapIcon.path);
+            bg.append("path")
+              .attr("class", "admin")
+              .datum(makeCollection(admin))
+              .attr("d", mapIcon.path);
+
+            console.info("done drawing map background");
+
+            function makeCollection(topology, key) {
+              if (key) {
+                return topojson.feature(topology, topology.objects[key]);
+              } else {
+                var collection = {
+                  type: "FeatureCollection",
+                  features: []
+                };
+                for (var key in topology.objects) {
+                  var features = topojson.feature(topology, topology.objects[key]).features;
+                  collection.features = collection.features.concat(features);
+                }
+                return collection;
+              }
+            }
           });
-
-        title.append("a")
-          .html("&times;")
-          .attr("class", "close")
-          .attr("href", "#" + [context.body, "provinsi", context.province].join("/"));
-
-        items
-          .attr("id", getDistrictId)
-          .classed("selected", false)
-          .each(function(d) {
-            d.feature = boundaries.lookup[d.id];
-          });
-
-        var content = enter.append("div")
-          .attr("class", "content");
-
-        var thumb = content.append("div")
-          .attr("class", "map thumb");
-
-        var svg = thumb.append("svg")
-          .attr("class", "map")
-          .attr("viewBox", function(d) {
-            var bounds = path.bounds(d.feature);
-            return [
-              bounds[0][0] - padding,
-              bounds[0][1] - padding,
-              bounds[1][0] - bounds[0][0] + padding * 2,
-              bounds[1][1] - bounds[0][1] + padding * 2
-            ].join(" ");
-          });
-
-        svg.append("g")
-          .attr("class", "bg")
-          .append("use")
-            .attr("xlink:href", "#map-bg");
-
-        svg.append("g")
-          .attr("class", "fg")
-          .append("path")
-            .attr("class", "province")
-            .attr("d", function(d) {
-              return path(d.feature);
-            });
-
-        return callback(null, items);
       });
-
-      // this will by our id function
-      function getDistrictId(d) {
-        return [
-          context.body,
-          "provinsi",
-          context.province,
-          "dapil",
-          d.id
-        ].join("/");
-      }
-    }
-
-    function selectDistrict(list, context, callback) {
-      var id = context.district,
-          children = list
-            .classed("selected", function(d) {
-              return d.id == id;
-            }),
-          selected = children.filter(".selected") // XXX
-            .call(scrollToElement);
-      if (callback) {
-        return selected.empty()
-          ? callback("no such district: " + id)
-          : callback(null, selected);
-      }
-    }
-
-    function getCandidates(context, callback) {
-      var params = {
-        lembaga: context.body,
-        provinsi: context.province
-      };
-
-      switch (context.body) {
-        case "DPD":
-          break;
-
-        case "DPR":
-        case "DPRDI":
-          params.dapil = context.district;
-          break;
-
-        default:
-          console.warn("unknown body (lembaga):", context.body);
-          return callback("unknown body: " + context.body);
-      }
-
-      return api.get("caleg", params, function(error, res) {
-        var candidates = res.results.caleg;
-        console.log("got candidates:", candidates);
-        return callback(null, candidates);
-      });
-    }
-
-    function getParties(context, callback) {
-      return getCandidates(context, function(error, candidates) {
-        if (error) return callback(error);
-
-        var parties = d3.nest()
-          .key(function(d) { return d.partai.id; })
-          .sortKeys(d3.ascending)
-          .entries(candidates)
-          .map(function(d) {
-            return {
-              id: d.key,
-              nama: d.values[0].partai.nama,
-              caleg: d.values
-            };
-          });
-        console.log("got parties:", parties);
-
-        return callback(null, parties);
-      });
-    }
-
-    function listParties(selection, context, callback) {
-      var list = selection.select(".parties");
-      if (list.empty()) {
-        list = selection.append("ul")
-          .attr("class", "parties");
-      }
-
-      list
-        .classed("loading", true)
-        .classed("error", false);
-      return getParties(context, function(error, parties) {
-        list
-          .classed("loading", false)
-          .classed("error", !!error);
-
-        if (error) return callback(error);
-
-        var groups = list.selectAll("li.party")
-              .data(parties, function(d) {
-                return d.id;
-              }),
-            enter = groups.enter()
-              .append("li")
-                .attr("class", "party");
-
-        var idPrefix = [
-          context.body,
-          "provinsi",
-          context.province
-        ];
-
-        switch (context.body) {
-          case "DPD":
-            break;
-          default:
-            idPrefix.push(
-              "dapil",
-              context.district
-            );
-        }
-
-        idPrefix.push("partai", "");
-
-        function getPartyId(d) {
-          return idPrefix.join("/") + d.id;
-        }
-
-        // only create titles for parties with ids
-        // (b/c DPD doesn't do parties)
-        var title = enter.append("h4")
-              .attr("class", "title"),
-            link = title.append("a")
-              .attr("class", "text")
-              .attr("href", function(d) {
-                return "#" + getPartyId(d);
-              })
-              .text(function(d) {
-                return d.nama;
-              });
-
-        groups
-          .attr("id", getPartyId)
-          .classed("selected", false);
-
-        return callback(null, groups);
-      });
-    }
-
-    function selectParty(selection, context, callback) {
-      var id = context.party,
-          children = selection
-            .classed("selected", function(d) {
-              return d.id == id;
-            }),
-          selected = children.filter(".selected") // XXX
-            .call(scrollToElement);
-
-      if (callback) {
-        return selected.empty()
-          ? callback("no such party: " + id)
-          : callback(null, selected);
-      }
-    }
-
-    function listCandidates(selection, context, callback) {
-      var list = selection.select(".candidates");
-      if (list.empty()) {
-        list = selection.append("ul")
-          .attr("class", "candidates");
-      }
-
-      list
-        .classed("loading", true)
-        .classed("error", false);
-      return getCandidates(context, function(error, candidates) {
-        list
-          .classed("loading", false)
-          .classed("error", !!error);
-
-        if (error) return callback(error);
-
-        var items = list.selectAll("li.candidate")
-              .data(candidates, function(d) {
-                return d.id;
-              }),
-            enter = items.enter()
-              .append("li")
-                .attr("class", "candidate");
-
-        var title = enter.append("h5")
-              .attr("class", "title"),
-            link = title.append("a")
-              .attr("href", function(d) {
-                return "#" + getCandidateId(d);
-              });
-
-        link.append("img")
-          .attr("class", "photo")
-          .attr("src", function(d) {
-            return d.foto_url;
-          });
-
-        link.append("span")
-          .attr("class", "text")
-          .text(function(d) {
-            return d.nama;
-          });
-
-        title.append("a")
-          .html("&times;")
-          .attr("class", "close")
-          .attr("href", function(d) {
-            var bits = getCandidateId(d).split("/");
-            return "#" + bits.slice(0, -2).join("/");
-          });
-
-        items
-          .attr("id", getCandidateId)
-          .classed("selected", false);
-
-        return callback(null, items);
-      });
-    }
-
-    function selectCandidate(list, context, callback) {
-      var id = context.candidate,
-          children = list
-            .classed("selected", function(d) {
-              return d.id == id;
-            }),
-          selected = children.filter(".selected") // XXX
-            .call(scrollToElement);
-
-      if (callback) {
-        return selected.empty()
-          ? callback("no such candidate: " + id)
-          : callback(null, selected);
-      }
-    }
-
-    function scrollToElement(selection) {
-      if (!selection.empty()) {
-        selection.node()
-          .scrollIntoView();
-      }
-    }
-
-    function addLayerToMap(layer, map) {
-      var added = [];
-      if (Array.isArray(layer)) {
-        layer.forEach(function(child) {
-          added = added.concat(addLayerToMap(child, map));
-        });
-      } else {
-        try {
-          layer.setMap(map);
-          added.push(layer);
-        } catch (err) {
-          console.warn("unable to add layer:", layer);
-        }
-      }
-      return added;
-    }
-
-    function sortCandidates(a, b) {
-      return d3.ascending(a.urutan, b.urutan);
-    }
-
-    function getCandidateId(d) {
-      switch (d.lembaga) {
-        case "DPD":
-          return [
-            d.lembaga,
-            "provinsi",
-            d.provinsi.id,
-            "caleg",
-            d.id
-          ].join("/");
-        default:
-          return [
-            d.lembaga,
-            "provinsi",
-            d.provinsi.id,
-            "dapil",
-            d.dapil.id,
-            "partai",
-            d.partai.id,
-            "caleg",
-            d.id
-          ].join("/");
-      }
-    }
 
     </script>
   </body>

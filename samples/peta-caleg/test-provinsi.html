@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="in">
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="css/vendor/bootstrap/bootstrap.min.css">
+    <link rel="stylesheet" href="css/design.css">
+    <!-- third-party (vendor) scripts -->
+    <script src="js/vendor/d3.v3.min.js"></script>
+    <script src="js/vendor/qs.min.js"></script>
+    <script src="js/vendor/queue.v1.min.js"></script>
+    <script src="js/vendor/topojson.v1.min.js"></script>
+    <!-- local scripts -->
+    <script src="js/peta_caleg.js"></script>
+    <script src="js/peta_caleg.api.js"></script>
+    <script src="js/peta_caleg.ui.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <h1>DPD provinsi</h1>
+      <p>This is a test of the provinsi listing interface.
+      It uses the <a href="http://docs.geographicapi.apiary.io/">geographic API</a>
+      to get admin provinsi and nearby country boundaries, then
+      lists the DPD provinsi from the
+      <a href="http://docs.candidateapi.apiary.io/#provinces">candidate API</a>,
+      and uses the geographic data to draw their respective map icons.</p>
+
+      <div id="provinsi">
+      </div>
+
+      <svg id="shared">
+        <defs></defs>
+      </svg>
+    </div>
+    <script>
+
+      var pc = peta_caleg,
+          context = pc.merge(qs.parse(location.search), {
+            lembaga: "DPD"
+          }),
+          api = pc.api()
+            .key("7941b0baecd128c4de3a9ae63a85fd2c"),
+          view = pc.ui.apiView.provinsi()
+            .api(api)
+            .href(function(d) {
+              return "#" + d.id;
+            });
+
+      queue()
+        .defer(api.get, "geographic/api/getmap", {
+          filename: "admin.topojson"
+        })
+        .defer(api.get, "geographic/api/getmap", {
+          filename: "nearby_countries.topojson"
+        })
+        .await(function(error, adminTopology, nearbyTopology) {
+          var admin = pc.geo.collection(adminTopology),
+              icon = view.media().icon();
+
+          var defs = d3.select("#shared defs");
+
+          defs.append("path")
+            .datum(topojson.mesh(nearbyTopology))
+              .attr("id", "bg-countries")
+              .attr("class", "nearby")
+              .attr("d", icon.path());
+
+          defs.append("path")
+            .datum(admin)
+              .attr("id", "bg-admin")
+              .attr("class", "provinsi")
+              .attr("d", icon.path());
+
+          icon
+            .bg(function(selection) {
+              selection.append("use")
+                .attr("xlink:href", "#bg-countries");
+              selection.append("use")
+                .attr("xlink:href", "#bg-admin");
+            })
+            .feature(function(d) {
+              return admin.lookup[d.id];
+            });
+
+          go();
+        });
+
+      function go() {
+        d3.select("#provinsi")
+          .call(view, context, function(error, selected) {
+            var items = d3.selectAll("li.provinsi"),
+                blah = items.selectAll("a.provinsi")
+                  .on("click", click),
+                ext = [
+                  {text: "DPD candidates", url: "test-caleg.html?lembaga=DPD&provinsi={id}"}
+                ],
+                links = items.select(".media-body")
+                  .selectAll("a.ext")
+                  .data(function(d) {
+                    return ext.map(function(link) {
+                      return {
+                        data: d,
+                        link: link
+                      };
+                    });
+                  });
+                links.enter().append("a")
+                  .attr("class", "ext");
+                links.exit().remove();
+                links
+                  .text(function(d) {
+                    return d.link.text;
+                  })
+                  .attr("href", function(d) {
+                    return d.link.url.replace(/{id}/g, d.data.id);
+                  });
+          });
+      }
+
+      function click(d) {
+        context.provinsi = d.id;
+        go();
+      }
+
+    </script>
+  </body>
+</html>

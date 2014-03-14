@@ -3,6 +3,9 @@ var pc = peta_caleg,
     api = pc.api()
       .key("7941b0baecd128c4de3a9ae63a85fd2c"),
     route = pc.router()
+      .match("", function(req) {
+        location.hash = "DPD";
+      })
       .notfound(function(error) {
         alert("404: " + error);
       }),
@@ -12,43 +15,60 @@ var pc = peta_caleg,
       {
         lembaga: "DPD",
         hierarchy: [
-          "provinsi",
-          "caleg"
+          pc.ui.apiView.provinsi()
+            .href(function(d) {
+              return ["#DPD", "provinsi", d.id].join("/");
+            }),
+          pc.ui.apiView.caleg()
+            .href(function(d) {
+              return ["#DPD", "provinsi", currentContext.provinsi,
+                "caleg", d.id].join("/");
+            })
         ],
       },
       {
         lembaga: "DPR",
         hierarchy: [
+          /*
           "provinsi",
           "dapil",
           "partai",
           "caleg"
+          */
         ],
       },
       {
         lembaga: "DPRDI",
         hierarchy: [
+          /*
           "provinsi",
           "dapil",
           "kabKota",
           "partai",
           "caleg"
+          */
         ],
       }
     ],
-    views = {};
+    views = pc.ui.apiView;
+
+function setupView(view) {
+  return view
+    .api(api);
+}
 
 contexts.forEach(function(ctx) {
   var bits = [ctx.lembaga],
       urls = [bits.join("/")];
-  ctx.hierarchy.forEach(function(key) {
+  ctx.hierarchy.forEach(function(view) {
+    var key = view.media().type();
     bits.push(key, "{" + key + "}");
     urls.push(bits.join("/"));
   });
   urls.forEach(function(url) {
     route.match(url, function(req) {
       var data = merge({}, ctx, req.data);
-      console.log("match:", req.url, data);
+      console.log("route:", req.url, data);
       setContext(data);
     });
   });
@@ -62,169 +82,8 @@ function hashchange() {
   route(location.hash.substr(1));
 }
 
-/*
- * Province list
- */
-views.provinsi = function(selection, context, callback) {
-  var list = selection.select("ul.provinsi");
-  if (list.empty()) {
-    list = selection.append("ul")
-      .attr("class", "provinsi media-list");
-  }
-
-  startLoading(list);
-  return getProvinsi(context, function(error, provinsi) {
-    finishLoading(list, error);
-
-    if (error) return callback(error);
-
-    var media = list.selectAll("li.provinsi")
-      .data(provinsi, getId);
-
-    var enter = media.enter()
-      .append("li")
-        .attr("class", "provinsi media");
-
-    media.exit().remove();
-
-    enter.call(createMediaListItem);
-
-    enter.select("a.pull-left")
-      .classed("provinsi", true)
-      .append("svg")
-        .attr("class", "media-object peta")
-        .call(createProvinsiMap);
-
-    enter.select(".media-header")
-      .append("h3")
-        .append("a")
-          .attr("class", "provinsi")
-          .text(function(d) {
-            return d.nama;
-          });
-
-    media.selectAll("a.provinsi")
-      .attr("href", function(d) {
-        return "#" + [context.lembaga, "provinsi", d.id].join("/");
-      })
-      .on("click", toggleActive);
-
-    if (context.provinsi) {
-      media.classed("active", function(d) {
-        return d.id == context.provinsi;
-      });
-      return callback(null, media.filter(".active")
-        .select(".media-body"));
-    } else {
-      media.classed("active", false);
-    }
-
-    return callback(null, null);
-  });
-};
-
-/*
- * Candidate list
- */
-views.caleg = function(selection, context, callback) {
-  var list = selection.select("ul.caleg");
-  if (list.empty()) {
-    list = selection.append("ul")
-      .attr("class", "caleg media-list");
-  }
-
-  startLoading(list);
-  return getCaleg(context, function(error, caleg) {
-    finishLoading(list, error);
-
-    if (error) return callback(error);
-
-    var media = list.selectAll("li.caleg")
-      .data(caleg, getId);
-
-    var enter = media.enter()
-      .append("li")
-        .attr("class", "caleg media");
-
-    enter.call(createMediaListItem);
-
-    media.exit().remove();
-
-    // candidate photo
-    enter.select("a.pull-left")
-      .classed("caleg", true)
-      .append("img")
-        .attr("class", "media-object foto")
-        .attr("src", function(d) {
-          return d.foto_url; // TODO update with new URL
-        });
-
-    // candidate name
-    enter.select(".media-header")
-      .append("h3")
-        .append("a")
-          .attr("class", "caleg")
-          .text(function(d) {
-            return d.nama;
-          });
-
-    var table = enter.select(".media-body")
-      .append("table")
-        .attr("class", "table caleg");
-
-    // fields to display in our table
-    var fields = [
-      {key: "jenis_kelamin", label: "Jenis Kelamin"},
-      {key: "tanggal_lahir", label: "Tanggal Lahir"},
-      {key: "tempat_lahir", label: "Tempat Lahir"},
-      {key: "agama", label: "Agama"},
-      {key: "tingaal", label: "Tingaal"},
-    ];
-
-    // create the fields table
-    var row = table.selectAll("tr")
-      .data(function(d) {
-        return fields.map(function(field) {
-          return merge({}, field, {
-            value: d[field.key]
-          });
-        });
-      })
-      .enter()
-        .append("tr");
-    row.append("td")
-      .text(function(d) {
-        return d.value;
-      });
-    row.append("th")
-      .text(function(d) {
-        return d.label;
-      });
-
-    // update the link hrefs
-    media.selectAll("a.caleg")
-      .attr("href", function(d) {
-        return "#" + getHierarchyHref(context, "caleg", d.id);
-      })
-      .on("click", toggleActive);
-
-    // only if the context specifies a candidate
-    if (context.caleg) {
-      media.classed("active", function(d) {
-        return d.id == context.caleg;
-      });
-      return callback(null, media.filter(".active")
-        .select(".media-body"));
-    } else {
-      media.classed("active", false);
-    }
-
-    return callback(null, null);
-  });
-};
-
 // lembaga-specific nav elements
-var navLembaga = d3.select("#nav-provinsi")
+var navLembaga = d3.select("#nav-lembaga")
   .selectAll("li")
     .data(contexts)
     .enter()
@@ -283,16 +142,17 @@ function setContext(data) {
       // if there are any more levels in the hierarchy...
       if (hierarchy.length) {
         // get the name of the next view
-        var name = hierarchy.shift();
+        var view = hierarchy.shift();
         // if the view exists...
-        if (name in views) {
+        if (typeof view === "function") {
           // our next step is nextView() if there's data for that view,
           // otherwise done()
           var next = (name in data)
             ? nextView
             : done;
+          setupView(view);
           // call that view on the selection
-          selection.call(views[name], data, next);
+          selection.call(view, data, next);
         } else {
           console.warn("no such view:", name);
           return done(null, selection);
@@ -403,17 +263,6 @@ function getId(d) {
 }
 
 /*
- * shallow copy the keys of an object into a new object
- */
-function copy(obj) {
-  var copied = {};
-  for (var key in obj) {
-    copied[key] = obj[key];
-  }
-  return copied;
-}
-
-/*
  * merge two or more objects' keys into the first object
  */
 function merge(obj, other) {
@@ -476,4 +325,8 @@ function finishLoading(selection, error) {
       .attr("class", "alert alert-danger")
       .text(error);
   }
+}
+
+function scrollIntoView(d) {
+  this.scrollIntoView();
 }

@@ -36,8 +36,13 @@
         padding = 1;
 
     function init() {
+      var bounds = new google.maps.LatLngBounds(
+        new google.maps.LatLng(-11.0, 95.0),
+        new google.maps.LatLng(6.07, 141.01)
+      );
+
       map = new google.maps.Map(document.getElementById("map"), {
-        center: pc.geo.bounds.getCenter(),
+        center: bounds.getCenter(),
         zoom: 4,
         mapTypeControl: false,
         scrollwheel: false,

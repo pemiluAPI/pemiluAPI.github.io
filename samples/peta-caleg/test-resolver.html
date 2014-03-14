@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <!-- third-party (vendor) scripts -->
+    <script src="js/vendor/d3.v3.min.js"></script>
+    <script src="js/vendor/qs.min.js"></script>
+    <script src="js/PetaCaleg.js"></script>
+  </head>
+  <body>
+    <ul>
+      <li><a href="#DPD">DPD</a></li>
+      <li><a href="#DPD/provinsi/12">DPD provinsi: 12</a></li>
+      <li><a href="#DPD/provinsi/12/caleg/1234">DPD provinsi: 12, caleg: 1234</a></li>
+    </ul>
+    <script>
+
+      var resolver = new PetaCaleg.Resolver();
+      resolver.add("{lembaga}", function(req) {
+        console.log("DPD:", req.data);
+      });
+      resolver.add("{lembaga}/provinsi/{provinsi}", function(req) {
+        console.log("DPD + provinsi:", req.data);
+      });
+      resolver.add("{lembaga}/provinsi/{provinsi}/caleg/{caleg}", function(req) {
+        console.log("DPD + provinsi + caleg:", req.data);
+      });
+
+      function hashchange() {
+        var url = location.hash.substr(1);
+        resolver.resolve(url);
+      }
+
+      window.addEventListener("hashchange", hashchange);
+      hashchange();
+
+    </script>
+  </body>
+</html>

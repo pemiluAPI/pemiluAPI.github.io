@@ -2,7 +2,7 @@
 
   peta_caleg.api = function() {
     var key = "XXX",
-        base = "http://api.pemiluapi.org/candidate/api/",
+        base = "http://api.pemiluapi.org/",
         api = {},
         cache = {},
         last;
@@ -36,9 +36,9 @@
       }
       return last = d3.json(url, function(error, res) {
         if (error) return callback(error);
-        if (cache) cache[url] = res.data;
+        if (cache) cache[url] = res.data || res;
         last = null;
-        return callback(null, res.data);
+        return callback(null, res.data || res);
       });
     };
 

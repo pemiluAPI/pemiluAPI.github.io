@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="in">
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="css/vendor/bootstrap/bootstrap.min.css">
+    <link rel="stylesheet" href="css/design.css">
+    <!-- third-party (vendor) scripts -->
+    <script src="js/vendor/d3.v3.min.js"></script>
+    <script src="js/vendor/qs.min.js"></script>
+    <script src="js/vendor/queue.v1.min.js"></script>
+    <script src="js/vendor/topojson.v1.min.js"></script>
+    <!-- local scripts -->
+    <script src="js/peta_caleg.js"></script>
+    <script src="js/peta_caleg.api.js"></script>
+    <script src="js/peta_caleg.ui.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Caleg listings</h1>
+      <p>This is a test of the caleg (candidate) listing interface.
+      It uses the <a href="http://docs.candidateapi.apiary.io/#candidates">candidate API</a>
+      to fetch a list of candidates and formats them on the page.
+      Clicking a candidate shows their information view.</p>
+
+      <div id="caleg">
+      </div>
+    </div>
+    <script>
+
+      var pc = peta_caleg,
+          context = pc.merge({
+            lembaga: null // DPD?
+          }, qs.parse(location.search)),
+          api = pc.api()
+            .key("7941b0baecd128c4de3a9ae63a85fd2c"),
+          view = pc.ui.apiView.caleg()
+            .api(api)
+            .href(function(d) {
+              return "#" + d.id;
+            });
+
+      go();
+
+      function go() {
+        d3.select("#caleg")
+          .call(view, context, function(error, selected) {
+            d3.selectAll("a.caleg")
+              .on("click", click);
+          });
+      }
+
+      function click(d) {
+        context.caleg = d.id;
+        go();
+      }
+
+    </script>
+  </body>
+</html>

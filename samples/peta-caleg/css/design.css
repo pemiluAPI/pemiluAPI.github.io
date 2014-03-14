@@ -1,5 +1,8 @@
 body {
-  padding-top: 70px;
+}
+
+#header {
+  position: relative;
 }
 
 #peta {
@@ -84,11 +87,26 @@ table.caleg th {
   padding: 0 8px 0 0 !important;
 }
 
-table.caleg td:first-child {
-  font-weight: bold;
+table.caleg tr > *:first-child {
+  text-align: right;
 }
 
-table.caleg th:last-child {
-  color: #666;
-  font-weight: normal;
+svg.media-object {
+  background: #b8dbff;
+}
+
+svg.media-object path,
+svg.media-object use {
+  fill: #ddd;
+  stroke: #bbb;
+  stroke-width: .1;
+  vector-effect: non-scaling-stroke;
+}
+
+svg.media-object .bg path.nearby {
+  fill: #aaa;
+}
+
+svg.media-object .fg path {
+  fill: red;
 }
