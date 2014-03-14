@@ -231,7 +231,7 @@
 
         if (error) return callback(error);
 
-        console.log("provinces:", provinces);
+        // console.log("provinces:", provinces);
 
         if (that.map) {
           var features = provinces.map(function(d) {
@@ -270,7 +270,6 @@
           that.content.call(utils.classify, "list-", "provinsi");
           that.listProvinces(provinces, context);
           that.map.zoomToInitialBounds();
-          console.log("calling:", callback);
           return callback();
         }
       });
@@ -291,6 +290,7 @@
         crumb.loading = false;
         that.setBreadcrumbs(context.breadcrumbs);
 
+        // console.log("candidates:", candidates);
         that.listCandidates(candidates, context);
 
         if (context.caleg) {
@@ -333,11 +333,246 @@
     },
 
     doDapil: function(context, callback) {
-      return callback("not implemented");
+      var that = this,
+          crumb = {
+            text: "Dapil (loading...)",
+            context: utils.copy(context, {}, ["lembaga", "provinsi"]),
+            loading: true
+          };
+      context.breadcrumbs.push(crumb);
+      this.setBreadcrumbs(context.breadcrumbs);
+      return this.getDapil(context, function(error, dapil) {
+        crumb.text = "Dapil";
+        crumb.loading = false;
+        that.setBreadcrumbs(context.breadcrumbs);
+
+        if (error) return callback(error);
+
+        // console.log("dapil:", dapil);
+
+        if (that.map) {
+          var features = dapil.map(function(d) {
+            return d.feature;
+          });
+          that.map.setDisplayFeatures(features, "dapil");
+          that.map.on("select", null);
+          that.map.selectFeatureById(context.dapil);
+          that.map.on("select", function(props) {
+            // console.log("select dapil:", props.id, props);
+            location.hash = that.resolver.getUrlForData({
+              lembaga: context.lembaga,
+              provinsi: context.provinsi,
+              dapil: props.id
+            });
+          });
+        }
+
+        if (context.dapil) {
+          var selected = utils.first(dapil, context.dapil);
+
+          if (selected) {
+            context.breadcrumbs.push({
+              text: selected.nama,
+              context: utils.copy(context, {}, ["lembaga", "provinsi", "dapil"])
+            });
+
+            if (that.map) {
+              that.map.zoomToFeature(selected.feature);
+            }
+            return callback(null, selected);
+          } else {
+            console.warn("no such dapil:", context.dapil, "in", dapil);
+            return callback("no such dapil: " + context.dapil);
+          }
+        } else {
+          that.content.call(utils.classify, "list-", "dapil");
+          that.listDapil(dapil, context);
+          // that.map.zoomToInitialBounds();
+          return callback();
+        }
+      });
+    },
+
+    listDapil: function(dapil, context) {
+      this.clearContent();
+
+      var href = (function(d) {
+        return "#" + this.resolver.getUrlForData({
+          lembaga: context.lembaga,
+          provinsi: context.provinsi,
+          dapil: d.id
+        });
+      }).bind(this);
+
+      var title = this.content.append("h3")
+            .text("Dapil"),
+          list = this.content.append("ul")
+            .attr("class", "dapil media-list"),
+          items = list.selectAll("li")
+            .data(dapil)
+            .enter()
+            .append("li")
+              .attr("class", "dapil media"),
+          icon = items.append("a")
+            .attr("class", "pull-left")
+            .attr("href", href)
+            .append("svg")
+              .attr("class", "media-object")
+              .call(this.makeMapIcon.bind(this), context),
+          head = items.append("div")
+            .attr("class", "media-header")
+            .append("h4")
+              .append("a")
+                .text(function(d) {
+                  return d.nama;
+                })
+                .attr("href", href),
+          body = items.append("div")
+            .attr("class", "media-body"),
+          including = body.append("p")
+            .text(function(d) {
+              return "Including: XXX, YYY, ZZZ...";
+            });
+    },
+
+    getDapil: function(context, callback) {
+      var params = utils.copy(context, {}, ["lembaga", "provinsi"]),
+          getBound = this.api.get.bind(this.api),
+          filename;
+
+      switch (context.lembaga) {
+        case "DPR":
+          filename = "dapil_nasional_dpr-simplified.topojson";
+          break;
+        case "DPRDI":
+          filename = "dapil_provinsi_dprdi-simplified.topojson";
+          break;
+      }
+
+      return queue()
+        .defer(getBound, "candidate/api/dapil", params)
+        .defer(getBound, "geographic/api/getmap", {filename: filename})
+        .await(function(error, res, topology) {
+          if (error) return callback(error);
+          var dapil = res.results.dapil,
+              collection = new PetaCaleg.GeoCollection(topology, {
+                idProperty: "id_dapil"
+              });
+          // console.log("dapil collection:", collection);
+          dapil.forEach(function(d) {
+            d.feature = collection.getFeatureById(d.id);
+            if (!d.feature) console.warn("no feature for:", d.id, d);
+          });
+          return callback(null, dapil);
+        });
     },
 
     doPartai: function(context, callback) {
-      return callback("not implemented");
+      var that = this,
+          crumb = {
+            text: "Partai (loading...)",
+            context: utils.copy(context, {}, ["lembaga", "provinsi", "dapil"])
+          };
+      context.breadcrumbs.push(crumb);
+      this.setBreadcrumbs(context.breadcrumbs);
+      return this.getPartai(context, function(error, partai) {
+        if (error) return callback(error);
+
+        crumb.text = "Partai";
+        crumb.loading = false;
+        that.setBreadcrumbs(context.breadcrumbs);
+
+        if (context.partai) {
+          var selected = utils.first(partai, context.partai);
+
+          if (selected) {
+            context.breadcrumbs.push({
+              text: selected.nama,
+              context: utils.copy(context, {}, ["lembaga", "provinsi", "dapil", "caleg"])
+            });
+
+            return callback(null, selected);
+          } else {
+            console.warn("no such partai:", context.partai, "in", partai);
+            return callback("no such partai: " + context.partai);
+          }
+        } else {
+          that.content.call(utils.classify, "list-", "partai");
+          that.listPartai(partai, context);
+          return callback();
+        }
+      });
+    },
+
+    getPartai: function(context, callback) {
+      var params = utils.copy(context, {}, ["lembaga", "provinsi", "dapil"]),
+          getBound = this.api.get.bind(this.api);
+      queue()
+        .defer(getBound, "candidate/api/caleg", params)
+        .defer(getBound, "candidate/api/partai")
+        .await(function(error, caleg, partai) {
+          if (error) return callback(error);
+          var candidates = caleg.results.caleg,
+              parties = partai.results.partai,
+              candidatesByParty = d3.nest()
+                .key(function(d) { return d.partai.id; })
+                .map(candidates),
+              matching = parties.filter(function(d) {
+                return candidatesByParty[d.id];
+              });
+          // console.log("candidates by party:", candidatesByParty, "+", parties, "->", matching);
+          return callback(null, matching);
+        });
+    },
+
+    listPartai: function(partai, context) {
+      this.clearContent();
+
+      var href = (function(d) {
+        return "#" + this.resolver.getUrlForData({
+          lembaga: context.lembaga,
+          provinsi: context.provinsi,
+          dapil: context.dapil,
+          partai: d.id
+        });
+      }).bind(this);
+
+      var title = this.content.append("h3")
+            .text("Partai"),
+          list = this.content.append("ul")
+            .attr("class", "partai media-list"),
+          items = list.selectAll("li")
+            .data(partai)
+            .enter()
+            .append("li")
+              .attr("class", "partai media"),
+          icon = items.append("a")
+            .attr("class", "pull-left")
+            .attr("href", href)
+            .append("img")
+              .attr("class", "media-object")
+              .attr("src", function(d) {
+                return d.url_logo_medium;
+              }),
+          head = items.append("div")
+            .attr("class", "media-header"),
+          title = head.append("h4")
+            .attr("class", "nama")
+            .append("a")
+              .text(function(d) {
+                return d.nama;
+              })
+              .attr("href", href),
+          subtitle = head.filter(function(d) {
+              return d.nama != d.nama_lengkap;
+            })
+            .append("h5")
+              .attr("class", "nama-lengkap")
+              .text(function(d) {
+                return d.nama_lengkap;
+              }),
+          body = items.append("div")
+            .attr("class", "media-body");
     },
 
     clearContent: function() {
@@ -390,17 +625,23 @@
     },
 
     getCandidates: function(context, callback) {
-      var params = utils.copy(context, {}, [
-        "lembaga",
-        "provinsi",
-        "dapil",
-        "partai"
-      ]);
-      return this.api.get("candidate/api/caleg", params, function(error, res) {
-        return error
-          ? callback(error)
-          : callback(null, res.results.caleg);
-      });
+      var params = utils.copy(context, {}, ["lembaga", "provinsi", "dapil"]),
+          getBound = this.api.get.bind(this.api);
+      queue()
+        .defer(getBound, "candidate/api/caleg", params)
+        .defer(getBound, "candidate/api/partai")
+        .await(function(error, caleg, partai) {
+          if (error) return callback(error);
+          var candidates = caleg.results.caleg,
+              partiesById = d3.nest()
+                .key(function(d) { return d.id; })
+                .rollup(function(d) { return d[0]; })
+                .map(partai.results.partai);
+          candidates.forEach(function(d) {
+            d.partai = partiesById[d.partai.id];
+          });
+          return callback(null, candidates);
+        });
     },
 
     listCandidates: function(candidates, context) {
@@ -484,9 +725,14 @@
       this.features = collection.features.slice();
 
       var id = options.idProperty;
+      collection.features.forEach(function(d) {
+        d.id = d.properties[id] || d[id];
+        // console.log(d.id, ":", d);
+      });
+
       this.lookup = d3.nest()
         .key(function(d) {
-          return d.properties[id] || d[id];
+          return d.id;
         })
         .rollup(function(d) {
           return d[0];
@@ -790,6 +1036,8 @@
       setDisplayFeatures: function(features, id) {
         if (this._displayId === id) return;
         this._displayId = id;
+
+        // console.log("features:", features);
 
         // copy the id down to the properties, because this is the part that
         // gets passed down to GeoJSON layers
