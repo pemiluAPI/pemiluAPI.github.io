@@ -164,6 +164,7 @@
 
           case "DPR":
           case "DPRDI":
+            // ah, nested callbacks...
             this.doProvinces(context, function(error, province) {
               if (error) return done(error);
               if (province) {
@@ -627,7 +628,14 @@
     getCandidates: function(context, callback) {
       var params = utils.copy(context, {}, ["lembaga", "provinsi", "dapil"]),
           getBound = this.api.get.bind(this.api);
-      queue()
+      if (params.lembaga === "DPD") {
+        return getBound("candidate/api/caleg", params, function(error, res) {
+          return error
+            ? callback(error)
+            : callback(null, res.results.caleg);
+        });
+      }
+      return queue()
         .defer(getBound, "candidate/api/caleg", params)
         .defer(getBound, "candidate/api/partai")
         .await(function(error, caleg, partai) {
@@ -682,8 +690,54 @@
                 })
                 .attr("href", href),
           body = items.append("div")
-            .attr("class", "media-body")
-            .text("TODO description here");
+            .attr("class", "media-body");
+
+      var dl = body.append("dl")
+        .attr("class", "dl-horizontal");
+
+      var df = d3.time.format("%Y-%m-%d"),
+          now = new Date(),
+          jenisMap = {
+            "L": "laki-laki",
+            "P": "perempuan"
+          },
+          tinggalFields = [
+            "provinsi",
+            "kab_kota",
+            "kecamatan",
+            "kelurahan"
+          ];
+
+      dl.append("h5")
+        .attr("class", "gender-age")
+        .text(function(d) {
+          var bits = [jenisMap[d.jenis_kelamin], age(d)]
+          return bits
+            .filter(notEmpty)
+            .join(", ");
+        });
+
+      dl.append("dt")
+        .text("tempat tinggal")
+      dl.append("dd")
+        .text(function(d) {
+          var bits = tinggalFields.map(function(f) {
+                return d[f + "_tinggal"];
+              })
+              .filter(function(d) {
+                return d;
+              });
+          return bits.join(", ");
+        });
+
+      function age(d) {
+        var date = df.parse(d.tanggal_lahir);
+        if (date) {
+          var years = now.getFullYear() - date.getFullYear();
+          return years + " thn";
+        }
+        return null;
+      }
     },
 
     selectCandidate: function(candidate) {
@@ -964,30 +1018,30 @@
         disableDefaultUI: true,
         featureStyles: {
           off: {
-            fillColor: "#fff",
-            fillOpacity: 1,
-            strokeColor: "#000",
+            fillColor: "#555555",
+            fillOpacity: .5,
+            strokeColor: "#cccccc",
             strokeWeight: .5,
             strokeOpacity: 1
           },
           offHover: {
-            fillColor: "#fee",
-            fillOpacity: 1,
-            strokeColor: "#000",
+            fillColor: "#555555",
+            fillOpacity: .75,
+            strokeColor: "#cccccc",
             strokeWeight: .5,
             strokeOpacity: 1
           },
           on: {
-            fillColor: "#f33",
-            fillOpacity: 1,
-            strokeColor: "#000",
+            fillColor: "#ff00ff",
+            fillOpacity: .5,
+            strokeColor: "#cccccc",
             strokeWeight: .5,
             strokeOpacity: 1
           },
           onHover: {
-            fillColor: "#f33",
-            fillOpacity: 1,
-            strokeColor: "#000",
+            fillColor: "#ff00ff",
+            fillOpacity: .75,
+            strokeColor: "#cccccc",
             strokeWeight: .5,
             strokeOpacity: 1
           }
@@ -1206,6 +1260,14 @@
   }
 
   function noop() {
+  }
+
+  function empty(d) {
+    return !d;
+  }
+
+  function notEmpty(d) {
+    return d && d.length;
   }
 
 })(this);

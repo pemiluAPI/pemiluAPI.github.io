@@ -20,6 +20,10 @@ svg.media-object {
   display: block;
 }
 
+.partai .media-object {
+  width: 100px;
+}
+
 .breadcrumb li.active a {
   color: inherit !important;
 }
@@ -76,7 +80,7 @@ svg.map .bg {
 }
 
 svg.map .fg path {
-  fill: #f0f;
+  fill: #555555;
   fill-opacity: .5;
   stroke: #ccc;
   stroke-width: .5;
