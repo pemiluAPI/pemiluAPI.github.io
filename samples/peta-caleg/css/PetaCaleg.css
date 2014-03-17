@@ -1,6 +1,53 @@
+body {
+  padding-top: 50px;
+}
+
 #peta {
   height: 280px;
 }
+
+@media (max-width: 768px) {
+  #peta {
+    height: 200px;
+  }
+}
+
+h3 {
+  margin-top: 13px;
+}
+
+.breadcrumb {
+  margin-bottom: 0;
+}
+
+#navbar .navbar-header:after {
+  clear: none !important;
+}
+
+#navbar .navbar-brand {
+  padding-right: 10px !important;
+}
+
+#nav-lembaga {
+  float: left !important;
+  margin: 0 !important;
+}
+
+#nav-lembaga:before {
+  display: none !important;
+  clear: none !important;
+}
+
+  #nav-lembaga > li {
+    float: left !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  #nav-lembaga > li > a {
+    padding-top: 15px !important;
+    padding-bottom: 15px !important;
+  }
 
 svg.media-object {
   width: 100px;
@@ -29,7 +76,7 @@ svg.media-object {
 }
 
 .zoom-control {
-  margin: 10px;
+  margin: 15px;
 }
 
   .zoom-control button {

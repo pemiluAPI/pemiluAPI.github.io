@@ -489,7 +489,7 @@
           if (selected) {
             context.breadcrumbs.push({
               text: selected.nama,
-              context: utils.copy(context, {}, ["lembaga", "provinsi", "dapil", "caleg"])
+              context: utils.copy(context, {}, ["lembaga", "provinsi", "dapil", "partai"])
             });
 
             return callback(null, selected);
@@ -626,7 +626,7 @@
     },
 
     getCandidates: function(context, callback) {
-      var params = utils.copy(context, {}, ["lembaga", "provinsi", "dapil"]),
+      var params = utils.copy(context, {}, ["lembaga", "provinsi", "dapil", "partai"]),
           getBound = this.api.get.bind(this.api);
       if (params.lembaga === "DPD") {
         return getBound("candidate/api/caleg", params, function(error, res) {
@@ -711,7 +711,7 @@
       dl.append("h5")
         .attr("class", "gender-age")
         .text(function(d) {
-          var bits = [jenisMap[d.jenis_kelamin], age(d)]
+          var bits = [age(d), jenisMap[d.jenis_kelamin]]
           return bits
             .filter(notEmpty)
             .join(", ");
@@ -744,7 +744,11 @@
       this.content.selectAll("li.caleg")
         .classed("active", function(d) {
           return d.id == candidate.id;
-        });
+        })
+        .filter(".active")
+          .each(function(d) {
+            // this.scrollIntoView();
+          });
     }
 
   });
