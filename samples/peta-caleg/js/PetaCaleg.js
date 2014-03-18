@@ -390,8 +390,16 @@
             return callback("no such dapil: " + context.dapil);
           }
         } else {
-          that.content.call(utils.classify, "list-", "dapil");
-          that.listDapil(dapil, context);
+
+          if (dapil.length === 1) {
+            console.warn("only 1 dapil in:", context.provinsi, dapil[0]);
+            context.breadcrumbs.pop();
+            // context.dapil = dapil[0].id;
+            return callback(null, dapil[0]);
+          } else {
+            that.content.call(utils.classify, "list-", "dapil");
+            that.listDapil(dapil, context);
+          }
           // that.map.zoomToInitialBounds();
           return callback();
         }
