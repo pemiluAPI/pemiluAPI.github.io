@@ -325,6 +325,10 @@
           if (error) return callback(error);
           var provinces = res.results.provinsi,
               collection = new PetaCaleg.GeoCollection(topology);
+          // sort provinces by name ascending
+          provinces.sort(function(a, b) {
+            return d3.ascending(a.nama, b.nama);
+          });
           provinces.forEach(function(d) {
             d.feature = collection.getFeatureById(d.id);
             if (!d.feature) console.warn("no feature for:", d.id, d);
@@ -836,28 +840,44 @@
           url = bits[0],
           query = bits[1]
             ? qs.parse(bits[1])
-            : {};
+            : {},
+          req;
+      // prefer absolute matches
       for (var i = 0, len = this.routes.length; i < len; i++) {
-        var route = this.routes[i],
-            match = url.match(route.pattern);
-        if (match) {
-          var data = {};
-          for (var i = 1; i < match.length; i++) {
-            var key = route.keys[i - 1];
-            data[key] = match[i];
-          }
-          var req = {
+        var route = this.routes[i];
+        if (route.url === url) {
+          req = {
             url: url,
-            data: data,
+            data: {},
             query: query
           };
-          if (route.callback) {
-            route.callback(req);
-          }
-          return req;
+          break;
         }
       }
-      return null;
+      if (!req) {
+        for (var i = 0, len = this.routes.length; i < len; i++) {
+          var route = this.routes[i],
+              match = url.match(route.pattern);
+          if (match) {
+            var data = {};
+            for (var j = 1; j < match.length; j++) {
+              var key = route.keys[j - 1];
+              data[key] = match[j];
+            }
+            req = {
+              url: url,
+              data: data,
+              query: query
+            };
+            break;
+          }
+        }
+      }
+      if (!req) return null;
+      if (route.callback) {
+        route.callback(req);
+      }
+      return req;
     },
 
     getUrlForData: function(data, keys) {

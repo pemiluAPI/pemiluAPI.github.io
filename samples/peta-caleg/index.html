@@ -16,35 +16,72 @@
 
     <script src="js/PetaCaleg.js"></script>
 
-    <link rel="stylesheet" href="css/vendor/bootstrap/bootstrap.min.css">
+    <link rel="stylesheet" href="css/vendor/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="css/PetaCaleg.css">
   </head>
   <body>
     <div id="header">
-      <div id="navbar" class="navbar navbar-inverse navbar-fixed-top">
+      <div id="navbar" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
         <div class="container-fluid">
           <div class="navbar-header">
             <a class="navbar-brand" href="#">Peta Caleg</a>
           </div>
-          <ul id="nav-lembaga" class="nav navbar-nav list-inline">
-            <li><a href="#DPD">DPD</a></li>
-            <li><a href="#DPR">DPR</a></li>
-            <li><a href="#DPRDI">DPRDI</a></li>
+          <ul class="nav navbar-nav">
+            <li><a href="#about">About</a></li>
           </ul>
         </div>
       </div>
     </div>
 
     <div id="top">
+      <div class="navbar navbar-inverse" role="navigation">
+        <div class="container-fluid">
+          <p class="navbar-text">Lembaga:</p>
+          <ul id="nav-lembaga" class="nav navbar-nav">
+            <li><a href="#DPD">DPD</a></li>
+            <li><a href="#DPR">DPR</a></li>
+            <li><a href="#DPRDI">DPRDI</a></li>
+          </ul>
+        </div>
+      </div>
+
       <div id="peta">
       </div>
 
       <ol id="breadcrumb" class="breadcrumb">
+        <li><a>Default text here</a></li>
       </ol>
     </div>
 
     <div class="container-fluid">
       <div id="content">
+      </div>
+    </div>
+
+    <div id="footer">
+      <div class="container-fluid">
+        <p>Logos go here.</p>
+      </div>
+    </div>
+
+    <div id="about" class="modal fade" tabindex="-1" role="dialog"
+      aria-labelledby="about-label" aria-hidden="false"
+      style="display: none">
+      <div class="modal-dialog">
+        <div class="modal-content">
+
+          <div class="modal-header">
+            <button type="button" class="close" aria-hidden="true">&times;</button>
+            <h4 class="modal-title" id="about-label">Modal Heading</h4>
+          </div>
+          <div class="modal-body">
+            <h4>About</h4>
+            <p>This is the about text.</p>
+
+            <h4>Another subtitle</h4>
+            <p>Blah blah blah.</p>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -96,6 +133,39 @@
             "{lembaga}/provinsi/{provinsi}/dapil/{dapil}/partai/{partai}/caleg/{caleg}",
           ]
         });
+
+        var aboutDialog = d3.select("#about");
+        aboutDialog
+          .on("click.background", function() {
+            if (d3.event.target === this) {
+              aboutDialog.call(closeDialog);
+              history.back();
+            } else {
+              console.log("(click elsewhere)");
+            }
+          })
+          .selectAll(".close")
+            .on("click.close", function() {
+              aboutDialog.call(closeDialog);
+              history.back();
+            });
+
+        app.resolver.add("about", function(context) {
+          console.log("about!", context);
+          aboutDialog.call(openDialog);
+        });
+
+        function openDialog(selection) {
+          selection
+            .style("display", "block")
+            .classed("in", true);
+        }
+
+        function closeDialog(selection) {
+          selection
+            .style("display", "none")
+            .classed("in", false);
+        }
 
         // whenever the app switches contexts...
         app.on("context", function(context) {
