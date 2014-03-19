@@ -828,8 +828,8 @@
       var df = d3.time.format("%Y-%m-%d"),
           now = new Date(),
           jenisMap = {
-            "L": "laki-laki",
-            "P": "perempuan"
+            "L": "Laki-laki",
+            "P": "Perempuan"
           },
           monthMap = {
             "01": "Januari",
@@ -863,6 +863,16 @@
           return bits
             .filter(notEmpty)
             .join(" ");
+        });
+
+      var jkli = ul.append("li");
+      jkli.append("span")
+        .attr("class", "header")
+        .text("Jenis Kelamin: ");
+      jkli.append("span")
+        .attr("class", "content")
+        .text(function(d) {
+          return jenisMap[d.jenis_kelamin];
         });
 
       var spli = ul.append("li");
