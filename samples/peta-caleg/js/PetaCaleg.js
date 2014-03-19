@@ -217,8 +217,12 @@
           };
 
       if (context.lembaga) {
+        lembagadisplay = context.lembaga;
+        if (lembagadisplay == "DPRDI") {
+          lembagadisplay = "DPRD I";
+        }
         breadcrumbs.push({
-          text: context.lembaga,
+          text: lembagadisplay,
           context: utils.copy(context, {}, ["lembaga"])
         });
 
@@ -793,30 +797,53 @@
               .attr("class", "caleg media"),
           icon = items.append("a")
             .attr("class", "pull-left")
+            .attr("href", href)
             .append("img")
               .attr("class", "media-object photo")
               .attr("src", function(d) {
                 return d.foto_url;
               }),
           head = items.append("div")
-            .attr("class", "media-header")
-            .append("h4")
-              .append("a")
-                .text(function(d) {
-                  return d.nama;
-                })
-                .attr("href", href),
+            .attr("class", "media-header"),
           body = items.append("div")
             .attr("class", "media-body");
 
-      var dl = body.append("dl")
-        .attr("class", "dl-horizontal");
+
+      head.append("span")
+        .attr("class", 'no-urut')
+        .text(function(d) {
+          return d.urutan;
+        });
+
+      head.append("a")
+        .attr("class", "candidate-name")
+        .attr("href", href)
+        .text(function(d) {
+          return d.nama;
+        });
+
+      var ul = body.append("ul")
+        .attr("class", "candidate-info");
 
       var df = d3.time.format("%Y-%m-%d"),
           now = new Date(),
           jenisMap = {
             "L": "laki-laki",
             "P": "perempuan"
+          },
+          monthMap = {
+            "01": "Januari",
+            "02": "Februari",
+            "03": "Maret",
+            "04": "April",
+            "05": "Mei",
+            "06": "Juni",
+            "07": "Juli",
+            "08": "Agustus",
+            "09": "September",
+            "10": "Oktober",
+            "11": "November",
+            "12": "Desember"
           },
           tinggalFields = [
             "provinsi",
@@ -825,18 +852,45 @@
             "kelurahan"
           ];
 
-      dl.append("h5")
-        .attr("class", "gender-age")
+      var ttlli = ul.append("li");
+      ttlli.append("span")
+        .attr("class", "header")
+        .text("TTL: ");
+      ttlli.append("span")
+        .attr("class", "content")
         .text(function(d) {
-          var bits = [age(d), jenisMap[d.jenis_kelamin]]
+          var bits = [prettyttl(d), age(d)]
           return bits
             .filter(notEmpty)
-            .join(", ");
+            .join(" ");
         });
 
-      dl.append("dt")
-        .text("tempat tinggal")
-      dl.append("dd")
+      var spli = ul.append("li");
+      spli.append("span")
+        .attr("class", "header")
+        .text("Status Perkawinan: ");
+      spli.append("span")
+        .attr("class", "content")
+        .text(function(d) {
+          return d.status_perkawinan;
+        });
+
+      var agamali = ul.append("li");
+      agamali.append("span")
+        .attr("class", "header")
+        .text("Agama: ");
+      agamali.append("span")
+        .attr("class", "content")
+        .text(function(d) {
+          return d.agama;
+        });
+
+      var tinggalli = ul.append("li");
+      tinggalli.append("span")
+        .attr("class", "header")
+        .text("Tempat Tinggal: ");
+      tinggalli.append("span")
+        .attr("class", "content")
         .text(function(d) {
           var bits = tinggalFields.map(function(f) {
                 return d[f + "_tinggal"];
@@ -847,11 +901,26 @@
           return bits.join(", ");
         });
 
+      function prettyttl(d) {
+        var bits = [d.tempat_lahir, prettydate(d)]
+        return bits
+          .filter(notEmpty)
+          .join(", ");
+      }
+
+      function prettydate(d) {
+        var parts = d.tanggal_lahir.split("-");
+        if (parts.length == 3) {
+          return parseInt(parts[2]) + " " + monthMap[[parts[1]]] + " " + parts[0];
+        }
+        return null;
+      }
+
       function age(d) {
         var date = df.parse(d.tanggal_lahir);
         if (date) {
           var years = now.getFullYear() - date.getFullYear();
-          return years + " thn";
+          return "(" + years + " thn)";
         }
         return null;
       }
