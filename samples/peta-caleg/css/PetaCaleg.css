@@ -172,6 +172,15 @@ ul.candidate-info span.header {
   color: inherit !important;
 }
 
+/* overwrite bootcamp styles for modal window */
+.modal-header .close {
+  margin-top: -12px;
+  padding: 0px 10px 10px 10px;
+  font-size: 42px;
+  border: 0px;
+  outline: 0px;
+}
+
 .zoom-control {
   margin: 15px;
 }

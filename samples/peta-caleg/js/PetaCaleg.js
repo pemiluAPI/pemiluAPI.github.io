@@ -859,7 +859,7 @@
       ttlli.append("span")
         .attr("class", "content")
         .text(function(d) {
-          var bits = [prettyttl(d), age(d)]
+          var bits = [prettyttl(d), newage(d)]
           return bits
             .filter(notEmpty)
             .join(" ");
@@ -916,10 +916,14 @@
         return null;
       }
 
-      function age(d) {
+      function newage(d) {
         var date = df.parse(d.tanggal_lahir);
         if (date) {
           var years = now.getFullYear() - date.getFullYear();
+          var months = now.getMonth() - date.getMonth();
+          if (months < 0 || (months === 0 && now.getDate() < date.getDate())) {
+            years--;
+          }
           return "(" + years + " thn)";
         }
         return null;
