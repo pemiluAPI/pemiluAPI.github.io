@@ -52,6 +52,84 @@
     });
   };
 
+  utils.progressQueue = function() {
+    return queue();
+    // FIXME
+    var q = queue(),
+        dispatch = d3.dispatch("load", "error", "progress"),
+        defer = q.defer,
+        await = q.await,
+        UNKNOWN_LENGTH = 100 * 1024,
+        requests = [];
+
+    q.defer = function(load) {
+      var args = [].slice.call(arguments, 1);
+      return defer(function(callback) {
+        var req;
+        args.push(function(error, data) {
+          if (error) return callback.call(this, error);
+          else if (!req) return;
+          req.loaded = req.total;
+          req.progress = 1;
+          var index = requests.indexOf(req);
+          if (index > -1) {
+            requests.splice(index, 1);
+            progress();
+          }
+          return callback.call(this, error, data);
+        });
+        console.log("defer(", load, args, ")");
+        req = load.apply(null, args);
+        if (req) {
+          req.on("progress", function() {
+            var e = d3.event;
+            if (e.lengthComputable) {
+              req.loaded = e.loaded;
+              req.total = e.total;
+              progress();
+            }
+          });
+          req.total = req.loaded = req.progress = 0;
+          requests.push(req);
+        }
+      });
+    };
+
+    function progress() {
+      var total = 0,
+          loaded = 0;
+      requests.forEach(function(req) {
+        if (req.total) {
+          total += req.total;
+          loaded += req.loaded;
+        } else {
+          total += UNKNOWN_LENGTH;
+        }
+      });
+
+      console.log("progress:", loaded, total);
+
+      if (total > 0) {
+        var progress = loaded / total;
+        dispatch.progress({
+          total: total,
+          loaded: loaded,
+          progress: progress
+        });
+
+        if (progress >= 1) {
+          dispatch.load({
+            total: total,
+            loaded: loaded,
+            requests: requests
+          });
+        }
+      }
+    }
+
+    return d3.rebind(q, dispatch, "on");
+  };
+
   // Class constructor
   PetaCaleg.Class = function(parent, proto) {
     if (arguments.length === 1) {
@@ -193,6 +271,33 @@
       }
     },
 
+    showProgress: function(req) {
+      return req;
+      // FIXME
+      var content = this.content
+            .classed("loading", true),
+          loader = content.select(".progress");
+      if (loader.empty()) {
+        loader = content.append("div")
+          .attr("class", "progress")
+          .append("div")
+            .attr("class", "progress-bar")
+            .attr("role", "progressbar");
+      }
+      var bar = loader.select(".progress-bar")
+        .style("width", "0%");
+      req.on("progress", function(e) {
+        var pct = (e.progress * 100).toFixed(1);
+        bar.style("width", pct + "%");
+        console.log("->", pct, bar.node());
+      });
+      req.on("load", function(e) {
+        // loader.remove();
+        content.classed("loading", false);
+      });
+      return req;
+    },
+
     setBreadcrumbs: function(breadcrumbs) {
       var bc = this.breadcrumb.selectAll("li")
         .data(breadcrumbs);
@@ -286,7 +391,7 @@
       context.breadcrumbs.push(crumb);
       this.setBreadcrumbs(context.breadcrumbs);
       this.content.call(utils.classify, "list-", "caleg");
-      this.getCandidates(context, function(error, candidates) {
+      return this.getCandidates(context, function(error, candidates) {
         crumb.text = "Caleg";
         crumb.loading = false;
         that.setBreadcrumbs(context.breadcrumbs);
@@ -316,10 +421,10 @@
     getProvinces: function(context, callback) {
       var params = utils.copy(context, {}, ["lembaga"]),
           getBound = this.api.get.bind(this.api);
-      return queue()
+      return utils.progressQueue()
         .defer(getBound, "candidate/api/provinsi", params)
         .defer(getBound, "geographic/api/getmap", {
-          filename: "admin-simple.topojson"
+          filename: "admin-provinsi-md.topojson"
         })
         .await(function(error, res, topology) {
           if (error) return callback(error);
@@ -444,7 +549,7 @@
             .attr("class", "media-body"),
           including = body.append("p")
             .text(function(d) {
-              return "Including: XXX, YYY, ZZZ...";
+              return ""; // :TODO: list contained kab/kota, kecamatan, kelurahan here
             });
     },
 
@@ -455,14 +560,14 @@
 
       switch (context.lembaga) {
         case "DPR":
-          filename = "dapil_nasional_dpr-simplified.topojson";
+          filename = "dapil-dpr-md.topojson";
           break;
         case "DPRDI":
-          filename = "dapil_provinsi_dprdi-simplified.topojson";
+          filename = "dapil-dprdi-md.topojson";
           break;
       }
 
-      return queue()
+      return utils.progressQueue()
         .defer(getBound, "candidate/api/dapil", params)
         .defer(getBound, "geographic/api/getmap", {filename: filename})
         .await(function(error, res, topology) {
@@ -520,7 +625,7 @@
     getPartai: function(context, callback) {
       var params = utils.copy(context, {}, ["lembaga", "provinsi", "dapil"]),
           getBound = this.api.get.bind(this.api);
-      queue()
+      return utils.progressQueue()
         .defer(getBound, "candidate/api/caleg", params)
         .defer(getBound, "candidate/api/partai")
         .await(function(error, caleg, partai) {
@@ -647,7 +752,7 @@
             : callback(null, res.results.caleg);
         });
       }
-      return queue()
+      return utils.progressQueue()
         .defer(getBound, "candidate/api/caleg", params)
         .defer(getBound, "candidate/api/partai")
         .await(function(error, caleg, partai) {
@@ -935,6 +1040,10 @@
       params.apiKey = this.options.key;
       var url = this.options.baseUrl + uri;
       if (params) {
+        // :TODO: temporary hack to get Kaltim results for Kaltara
+        if (params.provinsi == 65) {
+          params.provinsi = 64;
+        }
         url += "?" + qs.format(params);
       }
       if (this._cache && this._cache[url]) {
