@@ -54,8 +54,7 @@
     </div>
 
     <div class="container-fluid">
-      <div id="content">
-      </div>
+      <div id="content"></div>
     </div>
 
     <div id="footer">
@@ -204,22 +203,14 @@
               console.info("descending into candidate; not scrolling");
               return;
             }
+          } else if (last && last.indexOf("/caleg") > -1 && hash.indexOf("/caleg") > -1) {
+            // don't redraw if we're going from candidate to candidate
+            return;
           }
+
           // otherwise, we clear the content and scroll the body into view
           // (which scrolls to the top)
           app.content.html("");
-
-          d3.select(window)
-            .transition()
-            .duration(400)
-            .ease("linear")
-            .tween("scroll", function() {
-              if (this.scrollY < 200) return function() {};
-              var i = d3.interpolate(this.scrollY, 0);
-              return function(t) {
-                this.scrollTo(this.scrollX, i(t));
-              };
-            });
         });
 
         // kick it all off

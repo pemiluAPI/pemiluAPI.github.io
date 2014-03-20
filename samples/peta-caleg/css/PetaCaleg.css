@@ -97,6 +97,10 @@ h3 {
     margin-left: 0;
   }
 
+  #top .navbar .active a {
+    background-color: #ff00ff;
+  }
+
 #nav-lembaga {
   float: left !important;
   margin: 0 !important;

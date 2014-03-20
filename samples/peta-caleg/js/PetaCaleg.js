@@ -26,7 +26,9 @@
     if (!dest) dest = {};
     if (!keys) keys = Object.keys(source);
     keys.forEach(function(key) {
-      dest[key] = source[key];
+      if (source.hasOwnProperty(key)) {
+        dest[key] = source[key];
+      }
     });
     return dest;
   };
@@ -50,6 +52,31 @@
       klass.push(prefix + value);
       return klass.join(" ");
     });
+  };
+
+  utils.diff = function(a, b) {
+    var diff = [];
+    for (var k in a) {
+      if (a[k] != b[k]) {
+        // console.log("diff(" + k + "):", [a[k], b[k]]);
+        diff.push({
+          source: "a",
+          key: k,
+          value: a[k]
+        });
+      }
+    }
+    for (var k in b) {
+      if (!a.hasOwnProperty(k)) {
+        // console.log("diff(" + k + "):", [a[k], b[k]]);
+        diff.push({
+          source: "b",
+          key: k,
+          value: b[k]
+        });
+      }
+    }
+    return diff;
   };
 
   utils.progressQueue = function() {
@@ -208,7 +235,7 @@
     },
 
     update: function(callback) {
-      var context = this.getContext(),
+      var context = this.context,
           that = this,
           breadcrumbs = context.breadcrumbs = [],
           content = this.content,
@@ -240,7 +267,7 @@
           context: utils.copy(context, {}, ["lembaga"])
         });
 
-        this.content
+        content
           .call(utils.classify, "lembaga-", context.lembaga)
           .call(utils.classify, "list-", "none");
 
@@ -408,7 +435,6 @@
           };
       context.breadcrumbs.push(crumb);
       this.setBreadcrumbs(context.breadcrumbs);
-      this.content.call(utils.classify, "list-", "caleg");
       return this.getCandidates(context, function(error, candidates) {
         crumb.text = "Pilih Caleg";
         crumb.loading = false;
@@ -417,7 +443,12 @@
         if (error) return callback(error);
 
         // console.log("candidates:", candidates);
-        that.listCandidates(candidates, context);
+        that.content.call(utils.classify, "list-", "caleg");
+        if (that.content.select("ul.caleg").empty()) {
+          that.listCandidates(candidates, context);
+        } else {
+          console.info("already have candidates list!");
+        }
 
         if (context.caleg) {
           var candidate = utils.first(candidates, context.caleg);
@@ -440,13 +471,15 @@
 
     getProvinces: function(context, callback) {
       var params = utils.copy(context, {}, ["lembaga"]),
-          getBound = this.api.get.bind(this.api);
+          getBound = this.api.get.bind(this.api),
+          that = this;
       return utils.progressQueue()
         .defer(getBound, "candidate/api/provinsi", params)
         .defer(getBound, "geographic/api/getmap", {
           filename: "admin-provinsi-md.topojson"
         })
         .await(function(error, res, topology) {
+          that.checkContext(context);
           if (error) return callback(error);
 
           var provinces = res.results.provinsi;
@@ -586,7 +619,8 @@
     getDapil: function(context, callback) {
       var params = utils.copy(context, {}, ["lembaga", "provinsi"]),
           getBound = this.api.get.bind(this.api),
-          filename;
+          filename,
+          that = this;
 
       switch (context.lembaga) {
         case "DPR":
@@ -601,6 +635,7 @@
         .defer(getBound, "candidate/api/dapil", params)
         .defer(getBound, "geographic/api/getmap", {filename: filename})
         .await(function(error, res, topology) {
+          that.checkContext(context);
           if (error) return callback(error);
 
           var dapil = res.results.dapil;
@@ -658,12 +693,15 @@
 
     getPartai: function(context, callback) {
       var params = utils.copy(context, {}, ["lembaga", "provinsi", "dapil"]),
-          getBound = this.api.get.bind(this.api);
+          getBound = this.api.get.bind(this.api),
+          that = this;
       return utils.progressQueue()
         .defer(getBound, "candidate/api/caleg", params)
         .defer(getBound, "candidate/api/partai")
         .await(function(error, caleg, partai) {
+          that.checkContext(context);
           if (error) return callback(error);
+
           var candidates = caleg.results.caleg,
               parties = partai.results.partai;
 
@@ -680,7 +718,7 @@
               });
           return matching.length
             ? callback(null, matching)
-            : callback("No matching candidates found (among " + candidates.length + ") in " + parties.length + " parties");
+            : callback("Tidak ada data calon yang tersedia untuk partai ini.");
         });
     },
 
@@ -719,11 +757,11 @@
             .attr("class", "nama")
             .append("a")
               .text(function(d) {
-                return d.nama;
+                return d.nama_lengkap;
               })
               .attr("href", href),
           subtitle = head.filter(function(d) {
-              return d.nama != d.nama_lengkap;
+              return false;
             })
             .append("h5")
               .attr("class", "nama-lengkap")
@@ -735,7 +773,6 @@
     },
 
     clearContent: function() {
-      // XXX this isn't the right thing to do
       this.content.html("");
     },
 
@@ -774,6 +811,21 @@
                 .attr("href", href),
           body = items.append("div")
             .attr("class", "media-body");
+    },
+
+    checkContext: function(context) {
+      var keys = ["lembaga", "provinsi", "dapil", "partai"],
+          a = utils.copy(this.context, {}, keys),
+          b = utils.copy(context, {}, keys),
+          diff = utils.diff(a, b);
+      // console.log("comparing:", a, b);
+      if (diff.length) {
+        throw [
+          "context check failed:",
+          JSON.stringify(diff),
+          "(bailing)"
+        ].join(" ");
+      }
     },
 
     makeMapIcon: function(selection, context) {
@@ -828,9 +880,10 @@
         });
       }).bind(this);
 
-      var title = this.content.append("h3")
-            .text("Caleg"),
-          list = this.content.append("ul")
+      this.content.append("h3")
+        .text("Caleg");
+
+      var list = this.content.append("ul")
             .attr("class", "caleg list-group"),
           items = list.selectAll("li")
             .data(candidates)
@@ -865,27 +918,6 @@
 
       var ul = body.append("ul")
         .attr("class", "candidate-info");
-
-      var df = d3.time.format("%Y-%m-%d"),
-          now = new Date(),
-          jenisMap = {
-            "L": "Laki-laki",
-            "P": "Perempuan"
-          },
-          indonesianMonths = [
-            "Januari",
-            "Februari",
-            "Maret",
-            "April",
-            "Mei",
-            "Juni",
-            "Juli",
-            "Agustus",
-            "September",
-            "Oktober",
-            "November",
-            "Desember"
-          ];
 
       var fields = [
         {name: "Tempat dan Tanggal Lahir", key: function getTTL(d) {
@@ -943,34 +975,6 @@
         .html(function(d) {
           return d.value;
         });
-
-      function prettyTTL(d) {
-        var bits = [d.tempat_lahir, prettyDate(d)]
-        return bits
-          .filter(notEmpty)
-          .join("<br>");
-      }
-
-      function prettyDate(d) {
-        var date = df.parse(d.tanggal_lahir);
-        if (date) {
-          return [
-            date.getDate(),
-            indonesianMonths[date.getMonth()],
-            date.getFullYear()
-          ].join(" ");
-        }
-        return null;
-      }
-
-      function age(d) {
-        var date = df.parse(d.tanggal_lahir);
-        if (date) {
-          var years = d3.time.year.range(date, now).length;
-          return "(" + years + " thn)";
-        }
-        return null;
-      }
     },
 
     selectCandidate: function(candidate) {
@@ -1515,6 +1519,55 @@
 
   function notEmpty(d) {
     return d && d.length;
+  }
+
+  var df = d3.time.format("%Y-%m-%d"),
+      now = new Date(),
+      jenisMap = {
+        "L": "Laki-laki",
+        "P": "Perempuan"
+      },
+      indonesianMonths = [
+        "Januari",
+        "Februari",
+        "Maret",
+        "April",
+        "Mei",
+        "Juni",
+        "Juli",
+        "Agustus",
+        "September",
+        "Oktober",
+        "November",
+        "Desember"
+      ];
+
+  function prettyTTL(d) {
+    var bits = [d.tempat_lahir, prettyDate(d)]
+    return bits
+      .filter(notEmpty)
+      .join("<br>");
+  }
+
+  function prettyDate(d) {
+    var date = df.parse(d.tanggal_lahir);
+    if (date) {
+      return [
+        date.getDate(),
+        indonesianMonths[date.getMonth()],
+        date.getFullYear()
+      ].join(" ");
+    }
+    return null;
+  }
+
+  function age(d) {
+    var date = df.parse(d.tanggal_lahir);
+    if (date) {
+      var years = d3.time.year.range(date, now).length;
+      return "(" + years + " thn)";
+    }
+    return null;
   }
 
 })(this);
