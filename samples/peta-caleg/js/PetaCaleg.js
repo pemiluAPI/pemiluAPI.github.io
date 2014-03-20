@@ -808,7 +808,6 @@
           body = items.append("div")
             .attr("class", "media-body");
 
-
       head.append("span")
         .attr("class", 'no-urut')
         .text(function(d) {
@@ -847,21 +846,21 @@
           ];
 
       var fields = [
-        {name: "TTL",               key: function getTTL(d) {
+        {name: "Tempat dan Tanggal Lahir", key: function getTTL(d) {
           return [prettyTTL(d), age(d)]
             .filter(notEmpty)
             .join(" ");
         }},
-        {name: "Jenis Kelamin",     key: function getGender(d) {
+        {name: "Jenis Kelamin",            key: function getGender(d) {
           return jenisMap[d.jenis_kelamin];
         }},
-        {name: "Status Perkawinan", key: function getMaritalStatus(d) {
+        {name: "Status Perkawinan",        key: function getMaritalStatus(d) {
           return d.status_perkawinan;
         }},
-        {name: "Agama",             key: function getReligion(d) {
+        {name: "Agama",                    key: function getReligion(d) {
           return d.agama;
         }},
-        {name: "Tempat Tinggal",    key: function getResidence(d) {
+        {name: "Tempat Tinggal",           key: function getResidence(d) {
           return [
                 "provinsi",
                 "kab_kota",

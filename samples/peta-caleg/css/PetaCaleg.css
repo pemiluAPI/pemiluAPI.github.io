@@ -128,7 +128,7 @@ svg.media-object {
   margin: 0;
 }
 
-.caleg .media-header {
+.caleg.active .media-header {
   margin-bottom: 10px;
 }
 
@@ -138,7 +138,7 @@ svg.media-object {
 }
 
   .caleg .photo {
-    border: 2px solid #686868;
+    /* border: 2px solid #686868; */
   }
 
 .list-group-item {
@@ -180,20 +180,21 @@ svg.media-object {
   margin: 0;
 }
 
-span.no-urut {
-  margin: 0px 8px 0px 0px;
-  color: #686868;
-  font-weight: bold;
+.caleg .media-header {
   font-size: 18px;
-  font-weight: 500;
-  line-height: 1.1;
+  line-height: 1em;
+  font-weight: bold;
 }
 
-a.candidate-name {
-  font-size: 18px;
-  font-weight: 500;
-  line-height: 1.1;
-}
+  .caleg .media-header .no-urut {
+    color: #666;
+    display: inline-block;
+    float: left;
+    margin: 0 .33em 1px 0;
+  }
+
+  a.candidate-name {
+  }
 
 ul.candidate-info {
   padding-left: 0px;
@@ -221,7 +222,7 @@ ul.candidate-info .header {
 ul.candidate-info .content {
   font-weight: bold;
   display: block;
-  margin-left: 10px;
+  margin-left: 15px;
 }
 
 .breadcrumb {
