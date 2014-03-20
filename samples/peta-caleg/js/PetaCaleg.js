@@ -529,12 +529,12 @@
       var title = this.content.append("h3")
             .text("Dapil"),
           list = this.content.append("ul")
-            .attr("class", "dapil media-list"),
+            .attr("class", "dapil list-group"),
           items = list.selectAll("li")
             .data(dapil)
             .enter()
             .append("li")
-              .attr("class", "dapil media"),
+              .attr("class", "dapil list-group-item"),
           icon = items.append("a")
             .attr("class", "pull-left")
             .attr("href", href)
@@ -662,12 +662,12 @@
       var title = this.content.append("h3")
             .text("Partai"),
           list = this.content.append("ul")
-            .attr("class", "partai media-list"),
+            .attr("class", "partai list-group"),
           items = list.selectAll("li")
             .data(partai)
             .enter()
             .append("li")
-              .attr("class", "partai media"),
+              .attr("class", "partai list-group-item"),
           icon = items.append("a")
             .attr("class", "pull-left")
             .attr("href", href)
@@ -715,12 +715,12 @@
       var title = this.content.append("h3")
             .text("Provinsi"),
           list = this.content.append("ul")
-            .attr("class", "provinsi media-list"),
+            .attr("class", "provinsi list-group"),
           items = list.selectAll("li")
             .data(provinces)
             .enter()
             .append("li")
-              .attr("class", "provinsi media"),
+              .attr("class", "provinsi list-group-item"),
           icon = items.append("a")
             .attr("class", "pull-left")
             .attr("href", href)
@@ -789,12 +789,12 @@
       var title = this.content.append("h3")
             .text("Caleg"),
           list = this.content.append("ul")
-            .attr("class", "caleg media-list"),
+            .attr("class", "caleg list-group"),
           items = list.selectAll("li")
             .data(candidates)
             .enter()
             .append("li")
-              .attr("class", "caleg media"),
+              .attr("class", "caleg list-group-item"),
           icon = items.append("a")
             .attr("class", "pull-left")
             .attr("href", href)
@@ -831,109 +831,101 @@
             "L": "Laki-laki",
             "P": "Perempuan"
           },
-          monthMap = {
-            "01": "Januari",
-            "02": "Februari",
-            "03": "Maret",
-            "04": "April",
-            "05": "Mei",
-            "06": "Juni",
-            "07": "Juli",
-            "08": "Agustus",
-            "09": "September",
-            "10": "Oktober",
-            "11": "November",
-            "12": "Desember"
-          },
-          tinggalFields = [
-            "provinsi",
-            "kab_kota",
-            "kecamatan",
-            "kelurahan"
+          indonesianMonths = [
+            "Januari",
+            "Februari",
+            "Maret",
+            "April",
+            "Mei",
+            "Juni",
+            "Juli",
+            "Agustus",
+            "September",
+            "Oktober",
+            "November",
+            "Desember"
           ];
 
-      var ttlli = ul.append("li");
-      ttlli.append("span")
-        .attr("class", "header")
-        .text("TTL: ");
-      ttlli.append("span")
-        .attr("class", "content")
-        .text(function(d) {
-          var bits = [prettyttl(d), newage(d)]
-          return bits
+      var fields = [
+        {name: "TTL",               key: function getTTL(d) {
+          return [prettyTTL(d), age(d)]
             .filter(notEmpty)
             .join(" ");
-        });
-
-      var jkli = ul.append("li");
-      jkli.append("span")
-        .attr("class", "header")
-        .text("Jenis Kelamin: ");
-      jkli.append("span")
-        .attr("class", "content")
-        .text(function(d) {
+        }},
+        {name: "Jenis Kelamin",     key: function getGender(d) {
           return jenisMap[d.jenis_kelamin];
-        });
-
-      var spli = ul.append("li");
-      spli.append("span")
-        .attr("class", "header")
-        .text("Status Perkawinan: ");
-      spli.append("span")
-        .attr("class", "content")
-        .text(function(d) {
+        }},
+        {name: "Status Perkawinan", key: function getMaritalStatus(d) {
           return d.status_perkawinan;
-        });
-
-      var agamali = ul.append("li");
-      agamali.append("span")
-        .attr("class", "header")
-        .text("Agama: ");
-      agamali.append("span")
-        .attr("class", "content")
-        .text(function(d) {
+        }},
+        {name: "Agama",             key: function getReligion(d) {
           return d.agama;
-        });
-
-      var tinggalli = ul.append("li");
-      tinggalli.append("span")
-        .attr("class", "header")
-        .text("Tempat Tinggal: ");
-      tinggalli.append("span")
-        .attr("class", "content")
-        .text(function(d) {
-          var bits = tinggalFields.map(function(f) {
+        }},
+        {name: "Tempat Tinggal",    key: function getResidence(d) {
+          return [
+                "provinsi",
+                "kab_kota",
+                "kecamatan",
+                "kelurahan"
+              ].map(function(f) {
                 return d[f + "_tinggal"];
               })
-              .filter(function(d) {
-                return d;
-              });
-          return bits.join(", ");
+              .filter(notEmpty)
+              .join(", ");
+        }}
+      ];
+
+      var li = ul.selectAll("li")
+        .data(function(d) {
+          return fields.map(function(field) {
+            return {
+              caleg: d,
+              field: field,
+              value: field.key(d)
+            };
+          })
+          .filter(function(d) {
+            return d.value;
+          });
+        })
+        .enter()
+        .append("li");
+
+      li.append("span")
+        .attr("class", "header")
+        .text(function(d) {
+          return d.field.name;
         });
 
-      function prettyttl(d) {
-        var bits = [d.tempat_lahir, prettydate(d)]
+      li.append("span")
+        .attr("class", "content")
+        .html(function(d) {
+          return d.value;
+        });
+
+      function prettyTTL(d) {
+        var bits = [d.tempat_lahir, prettyDate(d)]
         return bits
           .filter(notEmpty)
-          .join(", ");
+          .join("<br>");
       }
 
-      function prettydate(d) {
-        var parts = d.tanggal_lahir.split("-");
-        if (parts.length == 3) {
-          return parseInt(parts[2]) + " " + monthMap[[parts[1]]] + " " + parts[0];
+      function prettyDate(d) {
+        var date = df.parse(d.tanggal_lahir);
+        if (date) {
+          return [
+            date.getDate(),
+            indonesianMonths[date.getMonth()],
+            date.getFullYear()
+          ].join(" ");
         }
         return null;
       }
 
-      function newage(d) {
+      function age(d) {
         var date = df.parse(d.tanggal_lahir);
         if (date) {
-          var years = now.getFullYear() - date.getFullYear();
-          var months = now.getMonth() - date.getMonth();
-          if (months < 0 || (months === 0 && now.getDate() < date.getDate())) {
-            years--;
-          }
+          var years = d3.time.year.range(date, now).length;
           return "(" + years + " thn)";
         }
         return null;

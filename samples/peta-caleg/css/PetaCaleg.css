@@ -124,21 +124,60 @@ svg.media-object {
   background: #ccc;
 }
 
-.caleg .media-object {
+.media-header > * {
+  margin: 0;
+}
+
+.caleg .media-header {
+  margin-bottom: 10px;
+}
+
+.media-object {
   width: 100px;
+  margin-right: 10px;
 }
 
-.caleg.media .media-body {
-  display: none;
+  .caleg .photo {
+    border: 2px solid #686868;
+  }
+
+.list-group-item {
+  padding: 10px;
 }
 
-.caleg.media.active .media-body {
-  margin-top: 15px;
-  display: block;
+.list-group-item:after {
+  content: " ";
+  display: table;
+  clear: both;
 }
+
+  .caleg.list-group-item .media-body {
+    display: none;
+  }
+
+  .caleg.list-group-item.active {
+    background: #f5f5f5;
+  }
+
+  .caleg.list-group-item.active .media-body {
+    margin-top: 15px;
+    display: block;
+  }
 
 .partai .media-object {
   width: 100px;
+}
+
+#content > .panel {
+  margin: 15px 0;
+}
+
+.panel-heading {
+  padding: 10px;
+}
+
+.panel-heading h3 {
+  margin: 0;
 }
 
 span.no-urut {
@@ -160,12 +199,36 @@ ul.candidate-info {
   padding-left: 0px;
 }
 
+ul.candidate-info,
 ul.candidate-info li {
   list-style-type: none;
 }
 
-ul.candidate-info span.header {
+ul.candidate-info .header {
+}
+
+ul.candidate-info li + li {
+  margin-top: 5px;
+}
+
+ul.candidate-info .header {
+  display: block;
+  font-size: 75%;
+  line-height: 1em;
+  color: #999;
+}
+
+ul.candidate-info .content {
   font-weight: bold;
+  display: block;
+  margin-left: 10px;
+}
+
+.breadcrumb {
+          border-radius: 0;
+  -webkit-border-radius: 0;
+     -moz-border-radius: 0;
+      -ms-border-radius: 0;
 }
 
 .breadcrumb li.active a {
