@@ -155,8 +155,8 @@
 
   PetaCaleg.App = new PetaCaleg.Class({
     defaults: {
-      routes: [
-      ]
+      collapseSingleDistricts: false,
+      routes: []
     },
 
     initialize: function(options) {
@@ -211,18 +211,30 @@
       var context = this.getContext(),
           that = this,
           breadcrumbs = context.breadcrumbs = [],
+          content = this.content,
           done = function(error) {
-            console.log("done!");
+            if (error) {
+              console.error("error:", error);
+              content.classed("error", true)
+                .append("div")
+                  .attr("class", "alert alert-danger")
+                  .text(error);
+            } else {
+              console.log("done!");
+            }
             that.setBreadcrumbs(breadcrumbs);
           };
 
+      content.selectAll(".alert")
+        .remove();
+
       if (context.lembaga) {
-        lembagadisplay = context.lembaga;
-        if (lembagadisplay == "DPRDI") {
-          lembagadisplay = "DPRD I";
+        var lembaga = context.lembaga;
+        if (lembaga == "DPRDI") {
+          lembaga = "DPRD I";
         }
         breadcrumbs.push({
-          text: lembagadisplay,
+          text: "Lembaga: " + lembaga,
           context: utils.copy(context, {}, ["lembaga"])
         });
 
@@ -328,14 +340,15 @@
     doProvinces: function(context, callback) {
       var that = this,
           crumb = {
-            text: "Provinsi (loading...)",
+            text: "Loading Provinsi...",
             context: utils.copy(context, {}, ["lembaga"]),
             loading: true
           };
       context.breadcrumbs.push(crumb);
       this.setBreadcrumbs(context.breadcrumbs);
       return this.getProvinces(context, function(error, provinces) {
-        crumb.text = "Provinsi";
+
+        crumb.text = "Select a Provinsi";
         crumb.loading = false;
         that.setBreadcrumbs(context.breadcrumbs);
 
@@ -363,10 +376,9 @@
           var province = utils.first(provinces, context.provinsi);
 
           if (province) {
-            context.breadcrumbs.push({
-              text: province.nama,
-              context: utils.copy(context, {}, ["lembaga", "provinsi"])
-            });
+            crumb.text = "Provinsi: " + province.nama;
+            crumb.context = utils.copy(context, {}, ["lembaga", "provinsi"]);
+            that.setBreadcrumbs(context.breadcrumbs);
 
             if (that.map) {
               that.map.zoomToFeature(province.feature);
@@ -388,7 +400,7 @@
     doCandidates: function(context, callback) {
       var that = this,
           crumb = {
-            text: "Caleg (loading...)",
+            text: "Loading Caleg...",
             context: utils.copy(context, {}, ["lembaga", "provinsi", "dapil", "partai"]),
             loading: true
           };
@@ -396,9 +408,11 @@
       this.setBreadcrumbs(context.breadcrumbs);
       this.content.call(utils.classify, "list-", "caleg");
       return this.getCandidates(context, function(error, candidates) {
-        crumb.text = "Caleg";
+        crumb.text = "Select a Caleg";
         crumb.loading = false;
         that.setBreadcrumbs(context.breadcrumbs);
+
+        if (error) return callback(error);
 
         // console.log("candidates:", candidates);
         that.listCandidates(candidates, context);
@@ -407,10 +421,10 @@
           var candidate = utils.first(candidates, context.caleg);
 
           if (candidate) {
-            context.breadcrumbs.push({
-              text: candidate.nama,
-              context: utils.copy(context, {}, ["lembaga", "provinsi", "caleg"])
-            });
+            crumb.text = "Caleg: " + candidate.nama;
+            crumb.context = utils.copy(context, {}, ["lembaga", "provinsi", "dapil", "partai", "caleg"]);
+            that.setBreadcrumbs(context.breadcrumbs);
+
             that.selectCandidate(candidate);
             return callback(null, candidate);
           } else {
@@ -432,8 +446,13 @@
         })
         .await(function(error, res, topology) {
           if (error) return callback(error);
-          var provinces = res.results.provinsi,
-              collection = new PetaCaleg.GeoCollection(topology);
+
+          var provinces = res.results.provinsi;
+          if (!provinces.length) {
+            return callback("No provinces found.");
+          }
+
+          var collection = new PetaCaleg.GeoCollection(topology);
           // sort provinces by name ascending
           provinces.sort(function(a, b) {
             return d3.ascending(a.nama, b.nama);
@@ -449,19 +468,25 @@
     doDapil: function(context, callback) {
       var that = this,
           crumb = {
-            text: "Dapil (loading...)",
+            text: "Loading Dapil...",
             context: utils.copy(context, {}, ["lembaga", "provinsi"]),
             loading: true
           };
       context.breadcrumbs.push(crumb);
       this.setBreadcrumbs(context.breadcrumbs);
       return this.getDapil(context, function(error, dapil) {
-        crumb.text = "Dapil";
+        crumb.text = "Select a Dapil";
         crumb.loading = false;
         that.setBreadcrumbs(context.breadcrumbs);
 
         if (error) return callback(error);
 
+        if (dapil.length === 1 && !that.options.collapseSingleDistricts) {
+          console.warn("only 1 dapil in:", context.provinsi, dapil[0]);
+          // context.breadcrumbs.pop();
+          context.dapil = dapil[0].id;
+          // return callback(null, dapil[0]);
+        }
         // console.log("dapil:", dapil);
 
         if (that.map) {
@@ -485,10 +510,9 @@
           var selected = utils.first(dapil, context.dapil);
 
           if (selected) {
-            context.breadcrumbs.push({
-              text: selected.nama,
-              context: utils.copy(context, {}, ["lembaga", "provinsi", "dapil"])
-            });
+            crumb.text = "Dapil: " + selected.nama;
+            crumb.context = utils.copy(context, {}, ["lembaga", "provinsi", "dapil"]);
+            that.setBreadcrumbs(context.breadcrumbs);
 
             if (that.map) {
               that.map.zoomToFeature(selected.feature);
@@ -500,7 +524,7 @@
           }
         } else {
 
-          if (dapil.length === 1) {
+          if (that.options.collapseSingleDistricts && dapil.length === 1) {
             console.warn("only 1 dapil in:", context.provinsi, dapil[0]);
             context.breadcrumbs.pop();
             // context.dapil = dapil[0].id;
@@ -508,9 +532,9 @@
           } else {
             that.content.call(utils.classify, "list-", "dapil");
             that.listDapil(dapil, context);
+            // that.map.zoomToInitialBounds();
+            return callback();
           }
-          // that.map.zoomToInitialBounds();
-          return callback();
         }
       });
     },
@@ -576,10 +600,15 @@
         .defer(getBound, "geographic/api/getmap", {filename: filename})
         .await(function(error, res, topology) {
           if (error) return callback(error);
-          var dapil = res.results.dapil,
-              collection = new PetaCaleg.GeoCollection(topology, {
-                idProperty: "id_dapil"
-              });
+
+          var dapil = res.results.dapil;
+          if (!dapil.length) {
+            return callback("No dapil found.");
+          }
+
+          var collection = new PetaCaleg.GeoCollection(topology, {
+            idProperty: "id_dapil"
+          });
           // console.log("dapil collection:", collection);
           dapil.forEach(function(d) {
             d.feature = collection.getFeatureById(d.id);
@@ -592,26 +621,25 @@
     doPartai: function(context, callback) {
       var that = this,
           crumb = {
-            text: "Partai (loading...)",
+            text: "Loading Partai...",
             context: utils.copy(context, {}, ["lembaga", "provinsi", "dapil"])
           };
       context.breadcrumbs.push(crumb);
       this.setBreadcrumbs(context.breadcrumbs);
       return this.getPartai(context, function(error, partai) {
-        if (error) return callback(error);
-
-        crumb.text = "Partai";
+        crumb.text = "Select a Partai";
         crumb.loading = false;
         that.setBreadcrumbs(context.breadcrumbs);
+
+        if (error) return callback(error);
 
         if (context.partai) {
           var selected = utils.first(partai, context.partai);
 
           if (selected) {
-            context.breadcrumbs.push({
-              text: selected.nama,
-              context: utils.copy(context, {}, ["lembaga", "provinsi", "dapil", "partai"])
-            });
+            crumb.text = "Partai: " + selected.nama;
+            crumb.context = utils.copy(context, {}, ["lembaga", "provinsi", "dapil", "partai"]);
+            that.setBreadcrumbs(context.breadcrumbs);
 
             return callback(null, selected);
           } else {
@@ -635,15 +663,22 @@
         .await(function(error, caleg, partai) {
           if (error) return callback(error);
           var candidates = caleg.results.caleg,
-              parties = partai.results.partai,
-              candidatesByParty = d3.nest()
+              parties = partai.results.partai;
+
+          if (!candidates.length) {
+            return callback("No parties found (no candidates).");
+          } else if (!parties.length) {
+            return callback("No parties found.");
+          }
+          var candidatesByParty = d3.nest()
                 .key(function(d) { return d.partai.id; })
                 .map(candidates),
               matching = parties.filter(function(d) {
                 return candidatesByParty[d.id];
               });
-          // console.log("candidates by party:", candidatesByParty, "+", parties, "->", matching);
-          return callback(null, matching);
+          return matching.length
+            ? callback(null, matching)
+            : callback("No matching candidates found (among " + candidates.length + ") in " + parties.length + " parties");
         });
     },
 
@@ -761,11 +796,16 @@
         .defer(getBound, "candidate/api/partai")
         .await(function(error, caleg, partai) {
           if (error) return callback(error);
-          var candidates = caleg.results.caleg,
-              partiesById = d3.nest()
-                .key(function(d) { return d.id; })
-                .rollup(function(d) { return d[0]; })
-                .map(partai.results.partai);
+
+          var candidates = caleg.results.caleg;
+          if (!candidates.length) {
+            return callback("No candidates found.");
+          }
+
+          var partiesById = d3.nest()
+            .key(function(d) { return d.id; })
+            .rollup(function(d) { return d[0]; })
+            .map(partai.results.partai);
           candidates.forEach(function(d) {
             d.partai = partiesById[d.partai.id];
           });

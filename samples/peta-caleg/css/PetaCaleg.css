@@ -196,6 +196,10 @@ svg.media-object {
   a.candidate-name {
   }
 
+#content .alert {
+  margin-top: 15px;
+}
+
 ul.candidate-info {
   padding-left: 0px;
 }
