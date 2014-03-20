@@ -249,7 +249,7 @@
                   .attr("class", "alert alert-danger")
                   .text(error);
             } else {
-              console.log("done!");
+              // console.log("done!");
             }
             that.setBreadcrumbs(breadcrumbs);
           };
