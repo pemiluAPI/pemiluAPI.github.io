@@ -27,7 +27,7 @@
             <a class="navbar-brand" href="#">Peta Caleg</a>
           </div>
           <ul class="nav navbar-nav">
-            <li><a href="#about">Tentang</a></li>
+            <li><a href="#about">Tentang Peta</a></li>
           </ul>
         </div>
       </div>
@@ -76,7 +76,7 @@
         <div class="modal-content">
           <div class="modal-header">
             <button type="button" class="close" aria-hidden="true">&times;</button>
-            <h4 class="modal-title" id="about-label">Tentang</h4>
+            <h4 class="modal-title" id="about-label">Tentang Peta</h4>
           </div>
           <div class="modal-body">
             <h4>Cara Menggunakan Peta Caleg</h4>
@@ -181,12 +181,45 @@
             .classed("in", false);
         }
 
+        var lastHash,
+            body = document.querySelector("body");
         // whenever the app switches contexts...
         app.on("context", function(context) {
           // update the nav
           nav.classed("active", function(d) {
             return d === context.lembaga;
           });
+
+          var hash = location.hash,
+              last = lastHash;
+          lastHash = hash;
+          // if the current hash begins with the last one,
+          // that means that we're descending into the hierarchy
+          if (last && hash.length > last.length && hash.indexOf(last) === 0) {
+            // then we grab the bit of the hash that's changed at the end
+            var subhash = hash.substr(last.length);
+            // console.info("[context] descending +", subhash);
+            // and if that bit begins with "/caleg" (candidate), we bail
+            if (subhash.indexOf("/caleg") === 0) {
+              console.info("descending into candidate; not scrolling");
+              return;
+            }
+          }
+          // otherwise, we clear the content and scroll the body into view
+          // (which scrolls to the top)
+          app.content.html("");
+
+          d3.select(window)
+            .transition()
+            .duration(400)
+            .ease("linear")
+            .tween("scroll", function() {
+              if (this.scrollY < 200) return function() {};
+              var i = d3.interpolate(this.scrollY, 0);
+              return function(t) {
+                this.scrollTo(this.scrollX, i(t));
+              };
+            });
         });
 
         // kick it all off
