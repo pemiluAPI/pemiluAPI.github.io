@@ -160,16 +160,21 @@
   utils.autoClick = function(selection) {
     selection
       .classed("auto-click", true)
-      .on("click.auto", click);
+      .on("click.auto", click, true);
 
     function click() {
-      if (d3.event.target !== this) return;
+      var e = d3.event;
+      if (e.target.nodeName === "A") return;
       var a = d3.select(this)
         .select("a")
           .node();
       if (a) {
         a.click();
-        d3.event.preventDefault();
+        try {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+        } catch (err) {
+        }
         return false;
       }
     }
@@ -390,7 +395,7 @@
     doProvinces: function(context, callback) {
       var that = this,
           crumb = {
-            text: "Loading Provinsi...",
+            text: "Memuat Provinsi...",
             context: utils.copy(context, {}, ["lembaga"]),
             loading: true
           };
@@ -451,7 +456,7 @@
     doCandidates: function(context, callback) {
       var that = this,
           crumb = {
-            text: "Loading Caleg...",
+            text: "Memuat Caleg...",
             context: utils.copy(context, {}, ["lembaga", "provinsi", "dapil", "partai"]),
             loading: true
           };
@@ -526,7 +531,7 @@
     doDapil: function(context, callback) {
       var that = this,
           crumb = {
-            text: "Loading Dapil...",
+            text: "Memuat Dapil...",
             context: utils.copy(context, {}, ["lembaga", "provinsi"]),
             loading: true
           };
@@ -683,7 +688,7 @@
     doPartai: function(context, callback) {
       var that = this,
           crumb = {
-            text: "Loading Partai...",
+            text: "Memuat Partai...",
             context: utils.copy(context, {}, ["lembaga", "provinsi", "dapil"])
           };
       context.breadcrumbs.push(crumb);
@@ -799,10 +804,31 @@
           body = items.append("div")
             .attr("class", "media-body");
 
-      body.append("h6")
-        .attr("class", "num-caleg")
+      // add a preview list of candidates
+      var title = body.append("h6")
+            .attr("class", "caleg-peek"),
+          list = title.selectAll("span.caleg")
+            .data(function(d) {
+              var numlist = Math.min(d.caleg.length, 3);
+              d.numleft = d.caleg.length - numlist;
+              copy = d.caleg.slice();
+              return d3.shuffle(copy).slice(0, numlist);
+            })
+            .enter()
+            .append("span")
+              .attr("class", "caleg");
+
+      list.append("span")
+        .attr("class", "glyphicon glyphicon-user");
+
+      list.append("span")
         .text(function(d) {
-          return d.caleg.length + " caleg";
+          return " " + d.nama + " ";
+        });
+
+      title.append("span")
+        .text(function(d) {
+          return (d.numleft) ? " dan " + d.numleft + " calon lagi." : ".";
         });
     },
 

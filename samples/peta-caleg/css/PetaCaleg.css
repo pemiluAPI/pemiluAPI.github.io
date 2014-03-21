@@ -172,6 +172,14 @@ svg.media-object {
   width: 100px;
 }
 
+.caleg-peek {
+  max-width: 32em;
+}
+
+.caleg-peek .glyphicon-user {
+  color: #666666;
+}
+
 #content > .panel {
   margin: 15px 0;
 }
