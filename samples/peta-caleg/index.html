@@ -212,18 +212,8 @@
           // (which scrolls to the top)
           app.content.html("");
 
-          d3.select(window)
-            .transition()
-            .duration(function() {
-              return this.scrollY * 2;
-            })
-            .ease("linear")
-            .tween("scroll", function() {
-              var i = d3.interpolate(this.scrollY, 0);
-              return function(t) {
-                this.scrollTo(this.scrollX, i(t));
-              };
-            });
+          // and just scroll right to the top
+          window.scrollTo(window.scrollX, 0);
         });
 
         // kick it all off

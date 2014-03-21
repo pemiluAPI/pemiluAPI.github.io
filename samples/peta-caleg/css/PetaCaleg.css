@@ -314,3 +314,7 @@ svg.map .fg path {
 svg.shared {
   display: none;
 }
+
+.auto-click {
+  cursor: pointer;
+}

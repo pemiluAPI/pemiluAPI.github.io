@@ -157,6 +157,24 @@
     return d3.rebind(q, dispatch, "on");
   };
 
+  utils.autoClick = function(selection) {
+    selection
+      .classed("auto-click", true)
+      .on("click.auto", click);
+
+    function click() {
+      if (d3.event.target !== this) return;
+      var a = d3.select(this)
+        .select("a")
+          .node();
+      if (a) {
+        a.click();
+        d3.event.preventDefault();
+        return false;
+      }
+    }
+  };
+
   // Class constructor
   PetaCaleg.Class = function(parent, proto) {
     if (arguments.length === 1) {
@@ -593,7 +611,8 @@
             .data(dapil)
             .enter()
             .append("li")
-              .attr("class", "dapil list-group-item"),
+              .attr("class", "dapil list-group-item")
+              .call(utils.autoClick),
           icon = items.append("a")
             .attr("class", "pull-left")
             .attr("href", href)
@@ -742,7 +761,8 @@
             .data(partai)
             .enter()
             .append("li")
-              .attr("class", "partai list-group-item"),
+              .attr("class", "partai list-group-item")
+              .call(utils.autoClick),
           icon = items.append("a")
             .attr("class", "pull-left")
             .attr("href", href)
@@ -794,7 +814,8 @@
             .data(provinces)
             .enter()
             .append("li")
-              .attr("class", "provinsi list-group-item"),
+              .attr("class", "provinsi list-group-item")
+              .call(utils.autoClick),
           icon = items.append("a")
             .attr("class", "pull-left")
             .attr("href", href)
@@ -889,7 +910,8 @@
             .data(candidates)
             .enter()
             .append("li")
-              .attr("class", "caleg list-group-item"),
+              .attr("class", "caleg list-group-item")
+              .call(utils.autoClick),
           icon = items.append("a")
             .attr("class", "pull-left")
             .attr("href", href)
