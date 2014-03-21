@@ -373,6 +373,9 @@
       bc.classed("active", function(d, i) {
           return i === breadcrumbs.length - 1;
         })
+        .classed("action", function(d) {
+          return !!d.action;
+        })
         .select("a")
           .text(function(d) {
             return d.text;
@@ -396,7 +399,7 @@
       return this.getProvinces(context, function(error, provinces) {
 
         crumb.text = "Pilih Provinsi";
-        crumb.loading = false;
+        crumb.action = true;
         that.setBreadcrumbs(context.breadcrumbs);
 
         if (error) return callback(error);
@@ -424,6 +427,7 @@
 
           if (province) {
             crumb.text = "Provinsi: " + province.nama;
+            crumb.action = false;
             crumb.context = utils.copy(context, {}, ["lembaga", "provinsi"]);
             that.setBreadcrumbs(context.breadcrumbs);
 
@@ -455,7 +459,7 @@
       this.setBreadcrumbs(context.breadcrumbs);
       return this.getCandidates(context, function(error, candidates) {
         crumb.text = "Pilih Caleg";
-        crumb.loading = false;
+        crumb.action = true;
         that.setBreadcrumbs(context.breadcrumbs);
 
         if (error) return callback(error);
@@ -473,6 +477,7 @@
 
           if (candidate) {
             crumb.text = "Caleg: " + candidate.nama;
+            crumb.action = false;
             crumb.context = utils.copy(context, {}, ["lembaga", "provinsi", "dapil", "partai", "caleg"]);
             that.setBreadcrumbs(context.breadcrumbs);
 
@@ -529,7 +534,7 @@
       this.setBreadcrumbs(context.breadcrumbs);
       return this.getDapil(context, function(error, dapil) {
         crumb.text = "Pilih Dapil";
-        crumb.loading = false;
+        crumb.action = true;
         that.setBreadcrumbs(context.breadcrumbs);
 
         if (error) return callback(error);
@@ -564,6 +569,7 @@
 
           if (selected) {
             crumb.text = "Dapil: " + selected.nama;
+            crumb.action = false;
             crumb.context = utils.copy(context, {}, ["lembaga", "provinsi", "dapil"]);
             that.setBreadcrumbs(context.breadcrumbs);
 
@@ -684,7 +690,7 @@
       this.setBreadcrumbs(context.breadcrumbs);
       return this.getPartai(context, function(error, partai) {
         crumb.text = "Pilih Partai";
-        crumb.loading = false;
+        crumb.action = true;
         that.setBreadcrumbs(context.breadcrumbs);
 
         if (error) return callback(error);
@@ -694,6 +700,7 @@
 
           if (selected) {
             crumb.text = "Partai: " + selected.nama;
+            crumb.action = false;
             crumb.context = utils.copy(context, {}, ["lembaga", "provinsi", "dapil", "partai"]);
             that.setBreadcrumbs(context.breadcrumbs);
 
@@ -733,7 +740,8 @@
                 .key(function(d) { return d.partai.id; })
                 .map(candidates),
               matching = parties.filter(function(d) {
-                return candidatesByParty[d.id];
+                d.caleg = candidatesByParty[d.id];
+                return notEmpty(d.caleg);
               });
           return matching.length
             ? callback(null, matching)
@@ -790,6 +798,12 @@
               }),
           body = items.append("div")
             .attr("class", "media-body");
+
+      body.append("h6")
+        .attr("class", "num-caleg")
+        .text(function(d) {
+          return d.caleg.length + " caleg";
+        });
     },
 
     clearContent: function() {
@@ -938,53 +952,77 @@
           return d.nama;
         });
 
-      var ul = body.append("ul")
-        .attr("class", "candidate-info");
-
-      var fields = [
-        {name: "Tempat dan Tanggal Lahir", key: function getTTL(d) {
-          return [prettyTTL(d), age(d)]
-            .filter(notEmpty)
-            .join(" ");
-        }},
-        {name: "Jenis Kelamin",            key: function getGender(d) {
-          return jenisMap[d.jenis_kelamin];
-        }},
-        {name: "Status Perkawinan",        key: function getMaritalStatus(d) {
-          return d.status_perkawinan;
-        }},
-        {name: "Agama",                    key: function getReligion(d) {
-          return d.agama;
-        }},
-        {name: "Tempat Tinggal",           key: function getResidence(d) {
-          return [
-                "provinsi",
-                "kab_kota",
-                "kecamatan",
-                "kelurahan"
-              ].map(function(f) {
-                return d[f + "_tinggal"];
-              })
+      var columns = [
+        [
+          {name: "Tempat dan Tanggal Lahir", key: function getTTL(d) {
+            return [prettyTTL(d), age(d)]
               .filter(notEmpty)
-              .join(", ");
-        }}
+              .join(" ");
+          }},
+          {name: "Jenis Kelamin",            key: function getGender(d) {
+            return jenisMap[d.jenis_kelamin];
+          }},
+          {name: "Status Perkawinan",        key: function getMaritalStatus(d) {
+            return d.status_perkawinan;
+          }}
+        ],
+        [
+          {name: "Agama",                    key: function getReligion(d) {
+            return d.agama;
+          }},
+          {name: "Tempat Tinggal",           key: function getResidence(d) {
+            return [
+                  "provinsi",
+                  "kab_kota",
+                  "kecamatan",
+                  "kelurahan"
+                ].map(function(f) {
+                  return d[f + "_tinggal"];
+                })
+                .filter(notEmpty)
+                .join(", ");
+          }}
+        ]
       ];
 
-      var li = ul.selectAll("li")
-        .data(function(d) {
-          return fields.map(function(field) {
-            return {
-              caleg: d,
-              field: field,
-              value: field.key(d)
-            };
-          })
-          .filter(function(d) {
-            return d.value;
-          });
-        })
-        .enter()
-        .append("li");
+      var ul = body.selectAll("ul.candidate-info")
+            .data(function(d) {
+              // each "column" will is a list of fields + values
+              var cols = columns.map(function(fields) {
+                return {
+                  caleg: d,
+                  fields: fields.map(function(field) {
+                    return {
+                      caleg: d,
+                      field: field,
+                      value: field.key(d)
+                    };
+                  })
+                  .filter(function(d) {
+                    return d.value;
+                  })
+                };
+              });
+
+              // ensure that there are at least 2 fields in the first column
+              var first = cols[0].fields,
+                  second = cols[1].fields;
+              while (first.length < 2 && second.length) {
+                first.push(second.pop());
+              }
+
+              return cols;
+            })
+            .enter()
+            .append("ul")
+              .attr("class", "candidate-info"),
+          li = ul.selectAll("li")
+            .data(function(d) {
+              // and each column gets a list item for each of its fields
+              return d.fields;
+            })
+            .enter()
+            .append("li");
 
       li.append("span")
         .attr("class", "header")

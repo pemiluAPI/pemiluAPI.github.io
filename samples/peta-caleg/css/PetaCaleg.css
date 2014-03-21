@@ -205,15 +205,15 @@ svg.media-object {
 }
 
 ul.candidate-info {
+  float: left;
   padding-left: 0px;
+  max-width: 16em;
+  margin-right: 30px;
 }
 
 ul.candidate-info,
 ul.candidate-info li {
   list-style-type: none;
-}
-
-ul.candidate-info .header {
 }
 
 ul.candidate-info li + li {
@@ -223,7 +223,6 @@ ul.candidate-info li + li {
 ul.candidate-info .header {
   display: block;
   font-size: 75%;
-  line-height: 1em;
   color: #999;
 }
 
@@ -241,7 +240,12 @@ ul.candidate-info .content {
 }
 
 .breadcrumb li.active a {
-  color: inherit !important;
+  color: inherit;
+  font-weight: bold;
+}
+
+.breadcrumb li.action a {
+  color: #000;
 }
 
 /* overwrite bootcamp styles for modal window */
