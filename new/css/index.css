@@ -1,0 +1,80 @@
+/* Space out content a bit */
+body {
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+/* Space out the logo */
+.pemilu-logo {
+  margin-bottom: 30px;
+}
+
+/* Everything but the jumbotron gets side spacing for mobile first views */
+.details,
+.footer {
+  padding-right: 15px;
+  padding-left: 15px;
+}
+
+.social {
+  margin-top: 30px;
+}
+
+.social .btn {
+  margin-top: 10px;
+}
+
+/* Custom page footer */
+.footer {
+  margin-top: 40px;
+  padding-top: 19px;
+  color: #777;
+  border-top: 1px solid #e5e5e5;
+}
+
+/* Customize container */
+@media (min-width: 768px) {
+  .container {
+    max-width: 730px;
+  }
+}
+.container-narrow > hr {
+  margin: 30px 0;
+}
+
+.container .jumbotron-ap {
+  text-align: center;
+  padding-top: 12px;
+  padding-right: 15px;
+  padding-bottom: 12px;
+  padding-left: 15px;
+  background-color: #f6f6f6;
+}
+
+.lead {
+  margin-bottom: 5px;
+}
+
+.well-ap p {
+  text-align: center;
+}
+
+.details p + h4 {
+  margin-top: 28px;
+}
+
+.details h3 {
+  color: #ed3024;
+}
+
+/* Responsive: Portrait tablets and up */
+@media screen and (min-width: 768px) {
+  /* Remove the padding we set earlier */
+  .details,
+  .footer {
+    margin-top: 20px;
+    padding-right: 0;
+    padding-left: 0;
+  }
+
+}

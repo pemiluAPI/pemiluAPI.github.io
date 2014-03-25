@@ -1,0 +1,132 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="img/favicon.ico">
+
+    <title>API Pemilu</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="css/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/vendor/bootstrap-social-buttons/social-buttons-3.css" rel="stylesheet">
+    <link href="css/vendor/font-awesome-4.0.3/css/font-awesome.css" rel="stylesheet">
+
+    <link href="css/index.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <div class="container">
+
+      <img src="img/logo.png" class="img-responsive center-block pemilu-logo" alt="API Pemilu Logo">
+      <div class="row">
+        <div class="col-sm-2"></div>
+          <div class="col-sm-8 text-center">
+            <p class="lead">Selamat Datang di API Pemilu, API informasi sipil untuk Pemilu 2014 dan seterusnya!</p>
+            <p class="lang"><a href="index.html">bahasa</a> - <a href="index-en.html">english</a></p>
+          </div>
+        <div class="col-sm-2"></div>
+      </div>
+
+      <div class="row">
+        <div class="col-sm-2"></div>
+          <div class="col-sm-8 text-center">
+            <div class="well well-sm well-ap">
+              <p><em>Ingin tahu lebih banyak tentang API ini?</em></p>
+              <p><a class="btn btn-info" href="api.html" role="button">Apa itu API Pemilu?</a></p>
+            </div>
+          </div>
+        <div class="col-sm-2"></div>
+      </div>
+
+      <div class="row details">
+        <div class="col-sm-1"></div>
+        <div class="col-sm-10">
+
+          <h3>Ingin membangun aplikasi menggunakan API ini?</h3>
+
+          <p>Jika kamu ingin membangun aplikasi dengan API ini, silahkan kunjungi situs khusus developer di: <a href="http://developer.pemiluapi.org/">http://developer.pemiluapi.org/</a></p>
+
+          <p>Kamu bisa mendaftar untuk mendapatkan kunci API di sana, atau gunakan kunci gratis ini: <strong>fea6f7d9ec0b31e256a673114792cb17</strong></p>
+
+          <p>Kami sarankan agar anda mendaftarkan kunci anda sendiri apabila akan menggunakan API ini untuk aplikasi produksi.</p>
+
+          <p>Dokumentasi untuk endpoint API dapat dilihat di sini: <a href="http://developer.pemiluapi.org/endpoints">http://developer.pemiluapi.org/endpoints</a></p>
+        </div>
+        <div class="col-sm-1"></div>
+      </div>
+
+      <div class="row details">
+        <div class="col-sm-1"></div>
+        <div class="col-sm-10">
+          <h3>How you can contribute to API Pemilu</h3>
+
+          <p>API Pemilu is a completely open-source project. You can find all the code for the API at our <a href="https://github.com/pemiluAPI/">GitHub organization page</a>. You can also find and downoad all the raw data in the API from <a href="https://github.com/pemiluAPI/pemilu-data">the pemilu-data respository</a> there.</p>
+
+          <p>If you'd like to contribute, look for projects that interest you, fork the code, and submit a pull request. Build your own app using the API and tell us about it, as <a href="https://github.com/yukuku/lombapemilu">other developers have done</a>. Look for open issues on any repository and help us fix them. Or open issues on any repository where you find bugs, mistakes, or opportunities for improvement. The API can be its best with a committed community of developers and citizens dedicated to keeping it current, accurate and useful.</p>
+        </div>
+        <div class="col-sm-1"></div>
+      </div>
+
+      <div class="row details">
+        <div class="col-sm-1"></div>
+        <div class="col-sm-10">
+          <h3>Yang saat ini tersedia di API Pemilu</h3>
+
+          <p>All the data served through the API is available for download from <a href="https://github.com/pemiluAPI/pemilu-data">the pemilu-data repository</a> on GitHub.</p>
+
+          <h4>Caleg</h4>
+          <p>Melalui endpoint API <a href="http://docs.candidateapi.apiary.io/">Caleg</a>, kamu bisa mendapatkan informasi mengenai seluruh kandidat DPR dan DPD (ada 7.552 calon!) termasuk foto dan informasi biografis mereka, serta lebih dari 20.000 calon DPRD I.</p>
+
+          <h4>Geografis</h4>
+          <p>Endpoint API <a href="http://docs.geographicapi.apiary.io/">Geografis</a> menyediakan daftar calon berdasarkan lokasi, kamu juga daoat mengakses peta terkini pada level provinsi, kabupaten/kota, dan kecamatan.</p>
+
+          <h4>Hukum &amp; Peraturan dan FAQ Pemilu</h4>
+          <p>Melalui endpoint API <a href="http://docs.peraturanapi.apiary.io/">Hukum &amp; Peraturan</a> dan <a href="http://docs.pendidikanapi.apiary.io/">FAQ Pemilu</a>, kamu dapat menemukan jawaban atas pertanyaan umum tentang pemilu yang dilengkapi dengan referensi dan kutipan peraturan acuan.</p>
+
+          <h4>Incumbent</h4>
+          <p>Dengan endpoint API <a href="http://docs.incumbentapi.apiary.io/">Incumbent</a>, kamu dapat lebih mengenali anggota-anggota DPD dan DPR saat ini.</p>
+
+          <h4>Berita &amp; Informasi</h4>
+          <p>Dan dengan endpoint API <a href="http://docs.beritaapi.apiary.io/">Berita &amp; Informasi</a>, kamu bisa mendapatkan berita pilkada terbaru yang relevan dengan kepentingan mereka.</p>
+
+          <h4>Dan lebih banyak lagi</h4>
+          <p>Bila kamu menggunakan API Pemilu, kamu akan mendapatkan informasi yang bebas, terbuka, terkini dan terverifikasi tentang pemilu dan pemerintah. Buatlah sesuatu yang <a href="https://twitter.com/apipemilu">menarik dan beritahu kami!</a></p>
+        </div>
+        <div class="col-sm-1"></div>
+      </div>
+
+      <div class="row social">
+        <div class="col-sm-2"></div>
+        <div class="col-sm-2"><a class="btn btn-facebook" href="http://facebook.com/pemiluAPI"><i class="fa fa-facebook"></i> | facebook</a></div>
+        <div class="col-sm-2"><a class="btn btn-twitter" href="http://twitter.com/APIpemilu"><i class="fa fa-twitter"></i> | twitter</a></div>
+        <div class="col-sm-2"><a class="btn btn-google-plus" href="https://plus.google.com/communities/106867955582527273510"><i class="fa fa-google-plus"></i> | google+</a></div>
+        <div class="col-sm-2"><a class="btn btn-tumblr" href="http://apipemilu.tumblr.com"><i class="fa fa-tumblr"></i> | tumblr</a></div>
+        <div class="col-sm-2"></div>
+      </div>
+
+      <div class="row">
+        <div class="col-sm-1"></div>
+        <div class="col-sm-10">
+          <div class="footer">
+            <p>API Pemilu dikelola oleh <a href="http://www.perludem.org">Perludem</a>.</p>
+          </div>
+        </div>
+        <div class="col-sm-1"></div>
+      </div>
+
+    </div> <!-- /container -->
+
+  </body>
+</html>
