@@ -1,71 +1,133 @@
-<html>
-<head>
-	<title>PEMILU API 2014</title>
-	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-	<link rel="stylesheet" type="text/css" media="screen" href="css/screen.css"/>
-</head>
-<body>
-<div id="wrapper">
-<div class="logotext"><span class="logoelections">PEMILU</span> <span class="logoapi">API</span> <span class="logo2014">2014</span></div>
 
-<p class="lang"><a href="index.html">bahasa</a> - <a href="index-en.html">english</a></p>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="img/favicon.ico">
 
-<p>Sebanyak 180 juta orang terdaftar sebagai pemilih dalam Pemilu 2014 di Indonesia dan kurang lebih 67 juta dari mereka akan memilih untuk pertama kalinya.</p>
+    <title>API Pemilu</title>
 
-<p>Pemilih butuh jawaban. Apakah saya terdaftar? Bagaimana pendirian para kandidat mengenai permasalahan yang penting bagi saya? Bagaimana mencoblos yang baik dan benar? Bagaimana apabila saya menemui kesulitan untuk memilih?</p>
+    <!-- Bootstrap core CSS -->
+    <link href="css/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/vendor/bootstrap-social-buttons/social-buttons-3.css" rel="stylesheet">
+    <link href="css/vendor/font-awesome-4.0.3/css/font-awesome.css" rel="stylesheet">
 
-<p>Untuk menjawab pertanyaan-pertanyaan tersebut, dan masih banyak lagi, kami membantu membangun sebuah tempat penyimpanan informasi terbuka untuk para pemilih Indonesia pada tahun 2014 &mdash; <span class="standout">sebuah pemilu API</span>.</p>
+    <link href="css/index.css" rel="stylesheet">
 
-<p>Pengembang akan dapat menggunakan API tersebut untuk membangun aplikasi yang dapat mengerjakan hal-hal berikut:</p>
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
 
-<ul>
-	<li>Membantu masyarakat untuk memastikan bahwa mereka adalah pemilih terdaftar</li>
-	<li>Memberi tahu teman-teman kalau kamu sudah memilih</li>
-	<li>Membuat animasi .gif mengenai suatu topik dan menyebarkannya</li>
-	<li>Mengingatkan bila ada acara politik yang ingin dihadiri</li>
-	<li>Memainkan video buatan pendukung calon tertentu</li>
-	<li>Menjalankan program otomatis (bot) untuk Twitter yang akan men-twit setiap seorang calon diliput oleh media</li>
-	<li>Menunjukkan seperti apa lembar suara itu</li>
-	<li>Memberikan kuis lalu men-twit skormu</li>
-	<li>Membantu pelaporan apabila ditemukan pemalsuan atau intimidasi</li>
-	<li><a href="/ideas/">Dan lain-lain...</a></li>
-</ul>
+  <body>
 
-<!-- form handling -->
-<script type="text/javascript">var submitted=false;</script>
-<iframe name="hidden_iframe" id="hidden_iframe" style="display:none;" onload="if(submitted) {window.location='/ideas/thankyou.html';}"></iframe>
-<form action="https://docs.google.com/forms/d/1OmYLHrnEY_0xE9OiYGLQfk1aKs2zR1pTLJd1_9bOQzI/formResponse" method="POST" id="ss-form" target="hidden_iframe" onsubmit="submitted=true;">
-	<input placeholder="Masukkan ide aplikasi Anda" type="text" name="entry.1266744776" value="" id="entry_1266744776" dir="auto" autocorrect="off" autocomplete="off" class="textinput">
-	<input type="hidden" name="draftResponse" value="[]">
-	<input type="hidden" name="pageHistory" value="0">
-	<input type="submit" value="Kirim" class="button">
-</form>
+    <div class="container">
 
-<h2>Bagaimana saya bisa membantu?</h2>
+      <img src="img/logo.png" class="img-responsive center-block pemilu-logo" alt="API Pemilu Logo">
+      <div class="row">
+        <div class="col-sm-2"></div>
+          <div class="col-sm-8 text-center">
+            <p class="lead">Selamat Datang di API Pemilu, API informasi sipil untuk Pemilu 2014 dan seterusnya!</p>
+            <p class="lang"><a href="index.html">bahasa</a> - <a href="index-en.html">english</a></p>
+          </div>
+        <div class="col-sm-2"></div>
+      </div>
 
-<p><span class="standout">Bergabunglah dengan kami!</span> Kami mencari pengembang untuk server, database, web dan mobile untuk membantu kami dalam membangun API dan aplikasi-aplikasi untuk itu.</p>
+      <div class="row">
+        <div class="col-sm-2"></div>
+          <div class="col-sm-8 text-center">
+            <div class="well well-sm well-ap">
+              <p><em>Ingin tahu lebih banyak tentang API ini?</em></p>
+              <p><a class="btn btn-info" href="api.html" role="button">Apa itu API Pemilu?</a></p>
+            </div>
 
-<p>Kami juga membuka kesempatan bagi desainer, marketer, ilustrator, animator atau individu berbakat lainnya yang ingin terlibat dalam proyek ini.</p>
+            <div class="alert alert-success">Para developer menggunakan API Pemilu untuk membangun aplikasi mobile dan web; temukan aplikasi-aplikasi tersebut di <a href="http://pemiluapps.org">pemiluapps.org</a> dan cobalah.</div>
+          </div>
+        <div class="col-sm-2"></div>
+      </div>
 
-<p><span class="standout">Jadilah bagian dari sejarah</span> dan mudahkanlah pemilihan dalam pemilihan umum demokratis terbesar di Indonesia.</p>
+      <div class="row details">
+        <div class="col-sm-1"></div>
+        <div class="col-sm-10">
+          <h3>Bagaimana cara membangun aplikasi menggunakan API Pemilu</h3>
 
-<h2>Hubungi kami</h2>
+          <p>Jika kamu ingin membangun aplikasi dengan API ini, silahkan kunjungi situs khusus developer di: <a href="http://developer.pemiluapi.org/">http://developer.pemiluapi.org/</a></p>
 
-<div class="bubble"><p>Jika kamu tertarik untuk mengerjakan proyek ini, kirimkan sur-el ke <a href="mailto:contact@pemiluapi.org">contact@pemiluapi.org</a> atau twit ke <a href="https://twitter.com/APIPemilu/">@APIPemilu</a>.</p>
+          <p>Kamu bisa mendaftar untuk mendapatkan kunci API di sana, atau gunakan kunci gratis ini: <strong>fea6f7d9ec0b31e256a673114792cb17</strong></p>
 
-<p>Kamu bisa menemukan permulaan dari proposal teknis untuk API pada <a href="https://github.com/pemiluAPI/pemiluAPI.github.io/blob/master/README.md">README situs ini di GitHub</a>.</p>
+          <p>Kami sarankan agar anda mendaftarkan kunci anda sendiri apabila akan menggunakan API ini untuk aplikasi produksi.</p>
 
-<p>Jika kamu ingin mengobrol lebih lanjut mengenai proyek ini, kamu bisa memulai atau bergabung dalam percakapan di <a href="https://github.com/pemiluAPI/pemiluAPI.github.io/issues">laman GitHub's Issues situs ini</a>.</p>
+          <p>Dokumentasi untuk endpoint API dapat dilihat di sini: <a href="http://developer.pemiluapi.org/endpoints">http://developer.pemiluapi.org/endpoints</a></p>
+        </div>
+        <div class="col-sm-1"></div>
+      </div>
 
-<p>Atau Anda dapat <a href="http://pemilu-api.survey.sgizmo.com/s3/">mengisi survei singkat</a> berikut ini dan berikan saran Anda mengenai bagaimana cara  menjangkau lebih banyak orang dengan informasi pemilu yang paling mereka butuhkan.</p>
-</div>
+      <div class="row details">
+        <div class="col-sm-1"></div>
+        <div class="col-sm-10">
+          <h3>Bagaimana cara berkontribusi untuk API Pemilu</h3>
 
-<h2>Apa itu API?</h2>
+          <p>API Pemilu sepenuhnya adalah proyek sumber terbuka (open-source). Kamu bisa menemukan semua kode untuk API ini pada <a href="https://github.com/pemiluAPI/">laman GitHub organisasi kami</a>. Kamu juga bisa menemukan dan mengunduh semua raw data dari API ini di <a href="https://github.com/pemiluAPI/pemilu-data">repository pemilu-data</a> di sana.</p>
 
-<p>API adalah singkatan dari <em>Application Programming Interface</em>. Interface atau antarmuka adalah dimana dua sistem bertemu dan berinteraksi. Sebuah API adalah antarmuka yang digunakan oleh sebuah aplikasi agar dapat berkomunikasi dengan aplikasi lain.</p>
+          <p>Jika kamu ingin berkontribusi, carilah proyek yang sesuai dengan minatmu, klon kodenya, dan ajukan permintaan ….? Kembangkan aplikasimu dengan menggunakan API ini dan beritahu kami hasilnya, seperti yang telah <a href="https://github.com/yukuku/lombapemilu">dilakukan oleh developer lain</a>. Kamu juga bisa mencari open issues pada repository manapun dan bantu kamu memperbaikinya. Atau mulai issues baru mengenai repository manapun bila kamu menemukan bugs, kesalahan, atau peluang untuk perbaikan. API ini dapat menjadi yang terbaik apabila didukung oleh komunitas developer dan orang-orang yang berkomitmen dan berdedikasi agar API ini selalu up-to-date, akurat dan berguna.</p>
+        </div>
+        <div class="col-sm-1"></div>
+      </div>
 
-<p><span class="standout">Pemilu API 2014</span> akan menjadi sebuah aplikasi yang menggunakan antarmukanya agar informasi dan fungsionalitas tentang pemilu 2014 di Indonesia tersedia untuk aplikasi lain.</p>
+      <div class="row details">
+        <div class="col-sm-1"></div>
+        <div class="col-sm-10">
+          <h3>Yang saat ini tersedia di API Pemilu</h3>
 
-</div>
-</body>
+          <p>Seluruh data yang disediakan API ini dapat diunduh dari <a href="https://github.com/pemiluAPI/pemilu-data">repository pemilu-data</a> di GitHub.</p>
+
+          <h4>Caleg</h4>
+          <p>Melalui endpoint API <a href="http://docs.candidateapi.apiary.io/">Caleg</a>, kamu bisa mendapatkan informasi mengenai seluruh kandidat DPR dan DPD (ada 7.552 calon!) termasuk foto dan informasi biografis mereka, serta lebih dari 20.000 calon DPRD I.</p>
+
+          <h4>Geografis</h4>
+          <p>Endpoint API <a href="http://docs.geographicapi.apiary.io/">Geografis</a> menyediakan daftar calon berdasarkan lokasi, kamu juga daoat mengakses peta terkini pada level provinsi, kabupaten/kota, dan kecamatan.</p>
+
+          <h4>Hukum &amp; Peraturan dan FAQ Pemilu</h4>
+          <p>Melalui endpoint API <a href="http://docs.peraturanapi.apiary.io/">Hukum &amp; Peraturan</a> dan <a href="http://docs.pendidikanapi.apiary.io/">FAQ Pemilu</a>, kamu dapat menemukan jawaban atas pertanyaan umum tentang pemilu yang dilengkapi dengan referensi dan kutipan peraturan acuan.</p>
+
+          <h4>Incumbent</h4>
+          <p>Dengan endpoint API <a href="http://docs.incumbentapi.apiary.io/">Incumbent</a>, kamu dapat lebih mengenali anggota-anggota DPD dan DPR saat ini.</p>
+
+          <h4>Berita &amp; Informasi</h4>
+          <p>Dan dengan endpoint API <a href="http://docs.beritaapi.apiary.io/">Berita &amp; Informasi</a>, kamu bisa mendapatkan berita pilkada terbaru yang relevan dengan kepentingan mereka.</p>
+
+          <h4>Dan lebih banyak lagi</h4>
+          <p>Bila kamu menggunakan API Pemilu, kamu akan mendapatkan informasi yang bebas, terbuka, terkini dan terverifikasi tentang pemilu dan pemerintah. Buatlah sesuatu yang <a href="https://twitter.com/apipemilu">menarik dan beritahu kami!</a></p>
+        </div>
+        <div class="col-sm-1"></div>
+      </div>
+
+      <div class="row social">
+        <div class="col-sm-2"></div>
+        <div class="col-sm-2"><a class="btn btn-facebook" href="http://facebook.com/pemiluAPI"><i class="fa fa-facebook"></i> | facebook</a></div>
+        <div class="col-sm-2"><a class="btn btn-twitter" href="http://twitter.com/APIpemilu"><i class="fa fa-twitter"></i> | twitter</a></div>
+        <div class="col-sm-2"><a class="btn btn-google-plus" href="https://plus.google.com/communities/106867955582527273510"><i class="fa fa-google-plus"></i> | google+</a></div>
+        <div class="col-sm-2"><a class="btn btn-tumblr" href="http://apipemilu.tumblr.com"><i class="fa fa-tumblr"></i> | tumblr</a></div>
+        <div class="col-sm-2"></div>
+      </div>
+
+      <div class="row">
+        <div class="col-sm-1"></div>
+        <div class="col-sm-10">
+          <div class="footer">
+            <p>API Pemilu adalah sebuah proyek dari <a href="http://www.perludem.org">Perludem</a>.</p>
+          </div>
+        </div>
+        <div class="col-sm-1"></div>
+      </div>
+
+    </div> <!-- /container -->
+
+  </body>
 </html>
