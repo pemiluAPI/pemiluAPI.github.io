@@ -43,6 +43,10 @@ body {
     clear: none !important;
   }
 
+  #navbar .navbar-nav > li > a {
+    padding-right: 0 !important;
+  }
+
   ul.navbar-nav {
     float: left;
     margin: 5px 0;
@@ -52,7 +56,7 @@ body {
     float: right !important;
   }
 
-  .navbar-text {
+  #top .navbar-text {
     float: left;
     margin-right: 15px;
   }
@@ -121,6 +125,35 @@ h3 {
     padding-top: 8px !important;
     padding-bottom: 8px !important;
   }
+
+#pemilu-logo {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+#pemilu-logo a {
+  display: inline-block;
+  width: 75px;
+  height: 38px;
+  background-image: url(../img/apipemilu-logo-header.png?bar);
+  background-repeat: no-repeat;
+  background-size: auto 80%;
+  background-position: bottom right;
+}
+
+  #pemilu-logo a span {
+    display: none;
+  }
+
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) { 
+  /* Retina-specific stuff here */
+  #pemilu-logo a {
+    width: 75px;
+    height: 38px;
+    background-image: url(../img/apipemilu-logo-header@2x.png);
+  }
+}
+
 
 svg.media-object {
   width: 100px;
