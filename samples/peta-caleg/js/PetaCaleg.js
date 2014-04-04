@@ -7,6 +7,88 @@
   // utility functions
   var utils = PetaCaleg.utils = {};
 
+  // monkey patch queue() to support progress events
+  var _queue = exports.queue,
+      queue = function() {
+        var q = _queue(),
+            defer = q.defer,
+            dispatch = d3.dispatch("progress"),
+            reqs = [],
+            loaded = 0;
+
+        q.defer = function() {
+          var args = [].slice.call(arguments);
+          return defer(function(callback) {
+            var fn = args.shift(),
+                req;
+            args.push(function() {
+              if (req) {
+                req.loaded = req.total;
+                update();
+              }
+              callback.apply(this, arguments);
+            });
+
+            req = fn.apply(this, args);
+            if (!req) return;
+
+            req.on("progress", function() {
+              var e = d3.event;
+              if (e.lengthComputable) {
+                req.total = e.total;
+                req.loaded = e.loaded;
+                update();
+              }
+            });
+
+            req.on("load.progress", function() {
+              req.loaded = req.total;
+              loaded++;
+              console.log("loaded", loaded, "of", reqs.length);
+              update();
+            });
+
+            req.loaded = 0;
+            req.total = 1024 * 1024;
+            reqs.push(req);
+            update();
+          });
+        };
+
+        q.empty = function() {
+          return reqs.length === 0;
+        };
+
+        function progress() {
+          var req = this;
+          update();
+        }
+
+        function finished(req) {
+          req.loaded = req.total;
+          update();
+        }
+
+        function update() {
+          var total = 0,
+              loaded = 0;
+          reqs.forEach(function(req) {
+            total += req.total;
+            loaded += req.loaded;
+          });
+          dispatch.progress({
+            total: total,
+            loaded: loaded,
+            progress: total > 0
+              ? loaded / total
+              : 0,
+            requests: reqs
+          });
+        }
+
+        return d3.rebind(q, dispatch, "on");
+      };
+
   /*
    * merge two or more objects' keys into the first object
    */
@@ -78,84 +160,6 @@
       }
     }
     return diff;
-  };
-
-  utils.progressQueue = function() {
-    return queue();
-    // FIXME
-    var q = queue(),
-        dispatch = d3.dispatch("load", "error", "progress"),
-        defer = q.defer,
-        await = q.await,
-        UNKNOWN_LENGTH = 100 * 1024,
-        requests = [];
-
-    q.defer = function(load) {
-      var args = [].slice.call(arguments, 1);
-      return defer(function(callback) {
-        var req;
-        args.push(function(error, data) {
-          if (error) return callback.call(this, error);
-          else if (!req) return;
-          req.loaded = req.total;
-          req.progress = 1;
-          var index = requests.indexOf(req);
-          if (index > -1) {
-            requests.splice(index, 1);
-            progress();
-          }
-          return callback.call(this, error, data);
-        });
-        console.log("defer(", load, args, ")");
-        req = load.apply(null, args);
-        if (req) {
-          req.on("progress", function() {
-            var e = d3.event;
-            if (e.lengthComputable) {
-              req.loaded = e.loaded;
-              req.total = e.total;
-              progress();
-            }
-          });
-          req.total = req.loaded = req.progress = 0;
-          requests.push(req);
-        }
-      });
-    };
-
-    function progress() {
-      var total = 0,
-          loaded = 0;
-      requests.forEach(function(req) {
-        if (req.total) {
-          total += req.total;
-          loaded += req.loaded;
-        } else {
-          total += UNKNOWN_LENGTH;
-        }
-      });
-
-      console.log("progress:", loaded, total);
-
-      if (total > 0) {
-        var progress = loaded / total;
-        dispatch.progress({
-          total: total,
-          loaded: loaded,
-          progress: progress
-        });
-
-        if (progress >= 1) {
-          dispatch.load({
-            total: total,
-            loaded: loaded,
-            requests: requests
-          });
-        }
-      }
-    }
-
-    return d3.rebind(q, dispatch, "on");
   };
 
   utils.autoClick = function(selection) {
@@ -341,28 +345,38 @@
     },
 
     showProgress: function(req) {
-      return req;
-      // FIXME
-      var content = this.content
+      var container = this.breadcrumb
             .classed("loading", true),
-          loader = content.select(".progress");
-      if (loader.empty()) {
-        loader = content.append("div")
-          .attr("class", "progress")
-          .append("div")
-            .attr("class", "progress-bar")
-            .attr("role", "progressbar");
+          loader = container.select(".progress");
+      if (!req || req.empty()) {
+        container.classed("loading", false);
+        loader.classed("done", true);
+        return req;
       }
-      var bar = loader.select(".progress-bar")
-        .style("width", "0%");
+      if (loader.empty()) {
+        loader = container.insert("div", "*")
+          .attr("class", "progress done");
+        loader.append("div")
+          .attr("class", "progress-bar")
+          .attr("role", "progressbar")
+          .style("width", "0%");
+        loader.append("div")
+          .attr("class", "progress-bar rest")
+          .attr("role", "progressbar")
+          .style("width", "100%");
+      }
+      var bar = loader
+            .classed("done", false)
+            .select(".progress-bar")
+              .style("width", "0%"),
+          rest = loader.select(".progress-bar.rest")
+            .style("width", "100%");
       req.on("progress", function(e) {
-        var pct = (e.progress * 100).toFixed(1);
+        var done = e.progress >= 1,
+            pct = Math.floor(e.progress * 100);
         bar.style("width", pct + "%");
-        console.log("->", pct, bar.node());
-      });
-      req.on("load", function(e) {
-        // loader.remove();
-        content.classed("loading", false);
+        rest.style("width", (100 - pct) + "%");
+        loader.classed("done", done);
       });
       return req;
     },
@@ -502,7 +516,7 @@
       var params = utils.copy(context, {}, ["lembaga"]),
           getBound = this.api.get.bind(this.api),
           that = this;
-      return utils.progressQueue()
+      return this.showProgress(queue()
         .defer(getBound, "candidate/api/provinsi", params)
         .defer(getBound, "geographic/api/getmap", {
           filename: "admin-provinsi-md.topojson"
@@ -526,7 +540,7 @@
             if (!d.feature) console.warn("no feature for:", d.id, d);
           });
           return callback(null, provinces);
-        });
+        }));
     },
 
     doDapil: function(context, callback) {
@@ -662,7 +676,7 @@
           break;
       }
 
-      return utils.progressQueue()
+      return this.showProgress(queue()
         .defer(getBound, "candidate/api/dapil", params)
         .defer(getBound, "geographic/api/getmap", {filename: filename})
         .await(function(error, res, topology) {
@@ -683,7 +697,7 @@
             if (!d.feature) console.warn("no feature for:", d.id, d);
           });
           return callback(null, dapil);
-        });
+        }));
     },
 
     doPartai: function(context, callback) {
@@ -727,7 +741,7 @@
       var params = utils.copy(context, {}, ["lembaga", "provinsi", "dapil"]),
           getBound = this.api.get.bind(this.api),
           that = this;
-      return utils.progressQueue()
+      return this.showProgress(queue()
         .defer(getBound, "candidate/api/caleg", params)
         .defer(getBound, "candidate/api/partai")
         .await(function(error, caleg, partai) {
@@ -752,7 +766,7 @@
           return matching.length
             ? callback(null, matching)
             : callback("Tidak ada data calon yang tersedia untuk partai ini.");
-        });
+        }));
     },
 
     listPartai: function(partai, context) {
@@ -907,7 +921,7 @@
             : callback(null, res.results.caleg);
         });
       }
-      return utils.progressQueue()
+      return this.showProgress(queue()
         .defer(getBound, "candidate/api/caleg", params)
         .defer(getBound, "candidate/api/partai")
         .await(function(error, caleg, partai) {
@@ -926,7 +940,7 @@
             d.partai = partiesById[d.partai.id];
           });
           return callback(null, candidates);
-        });
+        }));
     },
 
     listCandidates: function(candidates, context) {
@@ -1414,6 +1428,21 @@
         this.featureStyles = options.featureStyles;
         this.dispatch = d3.dispatch("select");
         d3.rebind(this, this.dispatch, "on");
+      },
+
+      fitBounds: function(bounds) {
+        var sw = bounds.getSouthWest(),
+            ne = bounds.getNorthEast(),
+            h = sw.lat() - ne.lat(),
+            w = sw.lng() - ne.lng(),
+            scale = .24,
+            pad = Math.max(h * scale, w * scale),
+            smaller = new google.maps.LatLngBounds(
+              new google.maps.LatLng(sw.lat() - pad, sw.lng() - pad),
+              new google.maps.LatLng(ne.lat() + pad, ne.lng() + pad)
+            );
+        // console.log(bounds.toString(), "->", smaller.toString(), [w, h]);
+        return google.maps.Map.prototype.fitBounds.call(this, smaller);
       },
 
       zoomToFeature: function(feature) {

@@ -6,7 +6,7 @@ body {
 }
 
 #peta {
-  height: 280px;
+  height: 420px;
 }
 
 #content {
@@ -30,7 +30,7 @@ body {
 
 @media (max-width: 768px) {
   #peta {
-    height: 200px;
+    height: 230px;
   }
 
   .navbar-header:before,
@@ -76,6 +76,28 @@ h3 {
 .breadcrumb {
   margin-bottom: 0;
 }
+
+  .breadcrumb .progress {
+    float: right;
+    width: 3em;
+    background: #ddd;
+    word-wrap: none;
+  }
+
+  .breadcrumb .progress.done .progress-bar {
+    transition: .5s background-color;
+    background-color: #ccc;
+  }
+
+  /* snagged from bootstrap.css's .progress-striped bits */
+  .breadcrumb .progress .progress-bar.rest {
+    background-color: #ccc;
+    background-image: -webkit-linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
+    background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
+    background-size: 40px 40px;
+    -webkit-animation: progress-bar-stripes 2s linear infinite;
+    animation: progress-bar-stripes 2s linear infinite;
+  }
 
 .navbar {
   min-height: 0px !important;
@@ -133,9 +155,9 @@ h3 {
 
 #pemilu-logo a {
   display: inline-block;
-  width: 75px;
-  height: 38px;
-  background-image: url(../img/apipemilu-logo-header.png?bar);
+  width: 65px;
+  height: 32px;
+  background-image: url(../img/apipemilu-logo-header.png?new);
   background-repeat: no-repeat;
   background-size: auto 80%;
   background-position: bottom right;
@@ -148,9 +170,7 @@ h3 {
 @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) { 
   /* Retina-specific stuff here */
   #pemilu-logo a {
-    width: 75px;
-    height: 38px;
-    background-image: url(../img/apipemilu-logo-header@2x.png);
+    background-image: url(../img/apipemilu-logo-header@2x.png?new);
   }
 }
 
