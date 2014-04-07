@@ -84,8 +84,13 @@ h3 {
     word-wrap: none;
   }
 
+  .breadcrumb .progress-bar {
+    /* this kills the width transition */
+            transition: .5s background-color;
+    -webkit-transition: .5s background-color;
+  }
+
   .breadcrumb .progress.done .progress-bar {
-    transition: .5s background-color;
     background-color: #ccc;
   }
 
@@ -95,8 +100,8 @@ h3 {
     background-image: -webkit-linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
     background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
     background-size: 40px 40px;
+            animation: progress-bar-stripes 2s linear infinite;
     -webkit-animation: progress-bar-stripes 2s linear infinite;
-    animation: progress-bar-stripes 2s linear infinite;
   }
 
 .navbar {
@@ -281,6 +286,11 @@ ul.candidate-info li + li {
   margin-top: 5px;
 }
 
+ul.candidate-info li.more {
+  margin-left: 15px;
+  margin-top: 20px;
+}
+
 ul.candidate-info .header {
   display: block;
   font-size: 75%;
@@ -291,6 +301,26 @@ ul.candidate-info .content {
   font-weight: bold;
   display: block;
   margin-left: 15px;
+}
+
+ul.candidate-info ol,
+ul.candidate-info ol > li {
+  list-style: square;
+  padding-left: 0;
+  margin-left: 1em;
+}
+
+  ul.candidate-info ol > li {
+    margin-left: 0;
+    padding-left: 0;
+  }
+
+  .modal ul.candidate-info .header {
+    font-size: 100%;
+  }
+
+.caleg span.more {
+  white-space: nowrap;
 }
 
 .breadcrumb {
@@ -316,6 +346,11 @@ ul.candidate-info .content {
   font-size: 42px;
   border: 0px;
   outline: 0px;
+}
+
+.modal-body > img.photo {
+  display: block;
+  margin: 0 0 1em 0;
 }
 
 .zoom-control {

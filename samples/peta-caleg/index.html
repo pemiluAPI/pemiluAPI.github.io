@@ -98,6 +98,22 @@
       </div>
     </div>
 
+    <div id="caleg-modal" class="modal fade" tabindex="-1" role="dialog"
+      aria-labelledby="about-label" aria-hidden="false"
+      style="display: none">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" aria-hidden="true">&times;</button>
+            <h4 class="modal-title" id="about-label">Caleg</h4>
+          </div>
+          <div class="modal-body clearfix">
+            <h4>Caleg info here</h4>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <svg class="shared">
       <defs>
         <g id="map-bg"></g>
@@ -135,54 +151,30 @@
           breadcrumb: "#breadcrumb",
           // where to render content (listings + detail views)
           content:    "#content",
+          // the modal dialog in which to show candidate info
+          candidateModal: new PetaCaleg.Modal("#caleg-modal"),
           // valid URLs
           routes: [
             "{lembaga}",
             "{lembaga}/provinsi/{provinsi}",
             "{lembaga}/provinsi/{provinsi}/caleg/{caleg}",
-            "{lembaga}",
+            "{lembaga}/provinsi/{provinsi}/caleg/{caleg}/{more}",
             // these are for 1-dapil provinsi
             "{lembaga}/provinsi/{provinsi}/partai/{partai}",
             "{lembaga}/provinsi/{provinsi}/partai/{partai}/caleg/{caleg}",
+            "{lembaga}/provinsi/{provinsi}/partai/{partai}/caleg/{caleg}/{more}",
             // and for provinsi -> dapil -> partai
             "{lembaga}/provinsi/{provinsi}/dapil/{dapil}",
             "{lembaga}/provinsi/{provinsi}/dapil/{dapil}/partai/{partai}",
             "{lembaga}/provinsi/{provinsi}/dapil/{dapil}/partai/{partai}/caleg/{caleg}",
+            "{lembaga}/provinsi/{provinsi}/dapil/{dapil}/partai/{partai}/caleg/{caleg}/{more}",
           ]
         });
 
-        var aboutDialog = d3.select("#about");
-        aboutDialog
-          .on("click.background", function() {
-            if (d3.event.target === this) {
-              aboutDialog.call(closeDialog);
-              history.back();
-            } else {
-              console.log("(click elsewhere)");
-            }
-          })
-          .selectAll(".close")
-            .on("click.close", function() {
-              aboutDialog.call(closeDialog);
-              history.back();
-            });
-
+        var aboutModal = new PetaCaleg.Modal("#about");
         app.resolver.add("about", function(context) {
-          console.log("about!", context);
-          aboutDialog.call(openDialog);
+          aboutModal.show();
         });
-
-        function openDialog(selection) {
-          selection
-            .style("display", "block")
-            .classed("in", true);
-        }
-
-        function closeDialog(selection) {
-          selection
-            .style("display", "none")
-            .classed("in", false);
-        }
 
         var lastHash,
             body = document.querySelector("body");
