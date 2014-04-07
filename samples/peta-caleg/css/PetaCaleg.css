@@ -114,6 +114,7 @@ h3 {
 
 .modal {
   background-color: rgba(0,0,0,.1);
+  overflow-y: auto;
 }
 
 #top .navbar {

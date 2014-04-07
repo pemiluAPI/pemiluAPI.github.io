@@ -231,10 +231,10 @@
         "status_perkawinan": {name: "Status Perkawinan", key: function getMaritalStatus(d) {
           return d.status_perkawinan;
         }},
-        "agama": {name: "Agama",                    key: function getReligion(d) {
+        "agama": {name: "Agama", key: function getReligion(d) {
           return d.agama;
         }},
-        "tempat_tinggal": {name: "Tempat Tinggal",           key: function getResidence(d) {
+        "tempat_tinggal": {name: "Tempat Tinggal", key: function getResidence(d) {
           return [
                 "provinsi",
                 "kab_kota",
@@ -429,20 +429,9 @@
     },
 
     showProgress: function(req) {
-      if (this._progressReq) {
-        this._progressReq.on("progress", null);
-        this._progressReq = null;
-      }
-
       var container = this.breadcrumb
             .classed("loading", true),
           loader = container.select(".progress");
-
-      if (!req || req.empty()) {
-        container.classed("loading", false);
-        loader.classed("done", true);
-        return req;
-      }
 
       if (loader.empty()) {
         loader = container.insert("div", "*")
@@ -463,6 +452,20 @@
               .style("width", "0%"),
           rest = loader.select(".progress-bar.rest")
             .style("width", "100%");
+
+      if (this._progressReq) {
+        container.classed("loading", false);
+        this._progressReq.on("progress", null);
+        this._progressReq = null;
+      }
+
+      if (!req || req.empty()) {
+        container.classed("loading", false);
+        bar.style("width", "100%");
+        rest.style("width", "0%");
+        loader.classed("done", true);
+        return req;
+      }
 
       req.on("progress", function(e) {
         var done = e.progress >= 1,
@@ -1101,7 +1104,7 @@
 
       var ul = body.selectAll("ul.candidate-info")
             .data(function(d) {
-              // each "column" will is a list of fields + values
+              // each "column" is a list of fields + values
               var cols = columns.map(function(fields) {
                 return {
                   caleg: d,
@@ -1229,7 +1232,7 @@
             ul = mbody.datum(info)
               .selectAll("ul.candidate-info")
               .data(function(d) {
-                // each "column" will is a list of fields + values
+                // each "column" is a list of fields + values
                 return columns.map(function(fields) {
                   return {
                     caleg: d,
@@ -1916,7 +1919,10 @@
   }
 
   function listify(items) {
-    return "<ol><li>" + items.join("</li><li>") + "</li></ol>";
+    if (items.length > 0) {
+      return "<ol><li>" + items.join("</li><li>") + "</li></ol>";
+    }
+    return ""
   }
 
 })(this);
